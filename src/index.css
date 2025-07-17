@@ -1,0 +1,384 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom cursor styles */
+.custom-cursor {
+  cursor: none !important;
+}
+
+.custom-cursor * {
+  cursor: none !important;
+}
+
+/* Custom cursor for interactive 3D elements */
+.custom-cursor-3d {
+  cursor: grab !important;
+}
+
+.custom-cursor-3d:active {
+  cursor: grabbing !important;
+}
+
+/* Theme transition styles */
+.theme-transition {
+  transition: background 0.3s cubic-bezier(0.4,0,0.2,1), color 0.3s cubic-bezier(0.4,0,0.2,1), border-color 0.3s cubic-bezier(0.4,0,0.2,1), box-shadow 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* Animation keyframes */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes pulse-slow {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Animation utility classes */
+.animate-fade-in-down {
+  animation: fadeInDown 0.3s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.3s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 4s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
+.animate-bounce-slow {
+  animation: float 5s ease-in-out infinite;
+}
+
+.animation-delay-1000 {
+  animation-delay: 1s;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-3000 {
+  animation-delay: 3s;
+}
+
+/* Simplified star field background for hero section */
+.star-field-background {
+  background-image: radial-gradient(circle at 25px 25px, rgba(255, 255, 255, 0.2) 1px, transparent 0),
+                    radial-gradient(circle at 75px 75px, rgba(255, 255, 255, 0.15) 1px, transparent 0),
+                    radial-gradient(circle at 125px 50px, rgba(255, 255, 255, 0.15) 1px, transparent 0);
+  background-size: 150px 150px;
+}
+
+/* Scrollbar customization */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-color);
+  @apply dark:bg-gray-900;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e0e7ef;
+  border-radius: 4px;
+  transition: background 0.2s;
+  border: 2px solid var(--background-color);
+  @apply dark:bg-blue-700 dark:border-gray-900;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b6c2d2;
+  @apply dark:bg-blue-600;
+}
+
+/* Selection styles */
+::selection {
+  background: #2563eb;
+  color: #fff;
+}
+
+/* Additional utility classes */
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+  
+  .text-shadow-md {
+    text-shadow: 0 3px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+  
+  .text-shadow-lg {
+    text-shadow: 0 10px 20px rgba(0, 0, 0, 0.09), 0 4px 10px rgba(0, 0, 0, 0.06);
+  }
+  
+  .text-shadow-none {
+    text-shadow: none;
+  }
+  
+  .bg-gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600;
+  }
+  
+  .bg-gradient-text-2 {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500;
+  }
+  
+  .bg-gradient-text-3 {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-fuchsia-600 via-purple-600 to-pink-600;
+  }
+  
+  /* 3D transform utilities */
+  .transform-3d {
+    transform-style: preserve-3d;
+    @apply perspective-1000;
+  }
+  
+  .flip-card-front, .flip-card-back {
+    @apply backface-hidden absolute inset-0;
+  }
+  
+  .flip-card {
+    @apply relative transform-3d transition-transform duration-600 ease-in-out;
+  }
+  
+  .flip-card:hover {
+    transform: rotateY(180deg);
+  }
+  
+  /* Hover scale effect */
+  .hover-scale {
+    @apply transition-transform duration-300 ease-in-out;
+  }
+  
+  .hover-scale:hover {
+    transform: scale(1.05);
+  }
+  
+  /* Glassmorphism effect */
+  .glass {
+    @apply bg-opacity-30 backdrop-blur-md border border-opacity-20;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    @apply dark:bg-opacity-20 dark:border-gray-700;
+  }
+}
+
+/* Define CSS variables for theme colors, synced with tailwind.config.js */
+:root {
+  --background-color: #ffffff; /* Fallback to match colors.background.light */
+  --text-color: #1f2937; /* Fallback to match colors.text.light */
+  --accent-color: #3b82f6; /* Fallback to match colors.accent.blue.DEFAULT */
+  --accent-hover: #2563eb; /* Fallback to match colors.accent.blue.hover */
+  --heading-color: #111827; /* Fallback for typography */
+  --code-bg-color: #f1f5f9; /* Fallback to match colors.slate.100 */
+  --code-text-color: #1e40af; /* Fallback to match colors.slate.800 */
+  --pre-bg-color: #1f2937; /* Fallback to match colors.slate.900 */
+  --pre-text-color: #e5e7eb; /* Fallback to match colors.slate.100 */
+}
+
+.dark {
+  --background-color: #1f2937; /* Fallback to match colors.background.dark */
+  --text-color: #e5e7eb; /* Fallback to match colors.text.dark */
+  --accent-color: #1d4ed8; /* Fallback to match colors.accent.blue.dark */
+  --accent-hover: #2563eb; /* Fallback to match colors.accent.blue.hover */
+  --heading-color: #f3f4f6; /* Fallback for typography */
+  --code-bg-color: #374151; /* Fallback to match colors.gray.800 */
+  --code-text-color: #93c5fd; /* Fallback to match colors.blue.300 */
+  --pre-bg-color: #111827; /* Fallback to match colors.gray.900 */
+  --pre-text-color: #d1d5db; /* Fallback to match colors.gray.200 */
+}
+
+:root[data-accent="blue"] {
+  --accent-color: #3b82f6; /* Fallback to match colors.accent.blue.DEFAULT */
+  --accent-hover: #2563eb; /* Fallback to match colors.accent.blue.hover */
+}
+
+:root[data-accent="purple"] {
+  --accent-color: #8b5cf6; /* Fallback to match colors.accent.purple.DEFAULT */
+  --accent-hover: #7c3aed; /* Fallback to match colors.accent.purple.hover */
+}
+
+:root[data-accent="teal"] {
+  --accent-color: #14b8a6; /* Fallback to match colors.accent.teal.DEFAULT */
+  --accent-hover: #0d9488; /* Fallback to match colors.accent.teal.hover */
+}
+
+:root[data-accent="rose"] {
+  --accent-color: #f43f5e; /* Fallback to match colors.accent.rose.DEFAULT */
+  --accent-hover: #e11d48; /* Fallback to match colors.accent.rose.hover */
+}
+
+/* Tech-inspired design elements */
+/* Simplified to rounded rectangle instead of hexagon */
+.hexagon-shape {
+  border-radius: 24px;
+}
+
+.hexagon-shape-border {
+  border-radius: 24px;
+}
+
+/* Simplified subtle dot pattern */
+.circuit-board-pattern {
+  background-image: 
+    radial-gradient(circle at 10px 10px, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Simplified border for image frames */
+.tech-border-pattern {
+  position: relative;
+  overflow: hidden;
+}
+
+.tech-border-pattern::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    transparent 0deg,
+    rgba(99, 102, 241, 0.1) 65deg,
+    transparent 110deg,
+    transparent 180deg,
+    rgba(79, 70, 229, 0.1) 245deg,
+    transparent 290deg,
+    transparent 360deg
+  );
+  opacity: 0.3;
+  animation: rotate-border 20s linear infinite;
+}
+
+@keyframes rotate-border {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Radial gradient for image vignette effect */
+.bg-radial-gradient {
+  background: radial-gradient(
+    circle at center,
+    transparent 40%,
+    rgba(0, 0, 0, 0.08) 100%
+  );
+}
+
+/* Simplified subtle animation */
+.data-flow-animation {
+  background: 
+    linear-gradient(90deg, transparent 0%, transparent 40%, rgba(99, 102, 241, 0.05) 40.1%, transparent 40.2%, transparent 100%),
+    linear-gradient(90deg, transparent 0%, transparent 60%, rgba(59, 130, 246, 0.05) 60.1%, transparent 60.2%, transparent 100%);
+  background-size: 
+    200% 100%,
+    200% 100%;
+  background-position:
+    0% 0%,
+    0% 50%;
+  animation: data-flow 12s linear infinite;
+}
+
+@keyframes data-flow {
+  to {
+    background-position:
+      200% 0%,
+      200% 33%,
+      200% 66%,
+      200% 100%;
+  }
+}
+
+/* Animation for 3D scene elements */
+@keyframes orbit {
+  0% {
+    transform: rotate(0deg) translateX(50px) rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg) translateX(50px) rotate(-360deg);
+  }
+}
+
+.orbit {
+  animation: orbit 10s linear infinite;
+}
+
+/* Pattern grid for background texture */
+.pattern-grid {
+  background-image: 
+    linear-gradient(to right, rgba(100, 116, 139, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(100, 116, 139, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+body {
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  background: var(--background-color, #f8fafc);
+  color: var(--text-color, #18181b);
+  transition: background 0.3s cubic-bezier(0.4,0,0.2,1), color 0.3s cubic-bezier(0.4,0,0.2,1);
+}
