@@ -21,10 +21,14 @@ const navItems: NavLink[] = [
   { id: 'skills', label: 'Skills' },
   { id: 'portfolio', label: 'Portfolio' },
   { id: 'contact', label: 'Contact' },
-  { id: 'resume', label: 'Resume', isExternal: true, href: 'public/Resume.pdf' },
+  { id: 'resume', label: 'Resume', isExternal: true }, // Remove href
 ];
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  openResumeModal: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ openResumeModal }) => {
   const { isDark } = useTheme();
   const { setCursorVariant } = useCursor();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -120,15 +124,18 @@ const Header: React.FC = () => {
               className="relative px-2"
             >
               <a
-                href={item.isExternal ? item.href : `#${item.id}`}
+                href={item.isExternal ? undefined : `#${item.id}`}
                 onClick={e => {
-                  if (!item.isExternal) {
+                  if (item.id === 'resume') {
+                    e.preventDefault();
+                    openResumeModal();
+                  } else if (!item.isExternal) {
                     e.preventDefault();
                     scrollToSection(item.id);
                   }
                 }}
-                target={item.isExternal ? '_blank' : undefined}
-                rel={item.isExternal ? 'noopener noreferrer' : undefined}
+                target={item.isExternal && item.id !== 'resume' ? '_blank' : undefined}
+                rel={item.isExternal && item.id !== 'resume' ? 'noopener noreferrer' : undefined}
                                  className={`px-2 py-2 text-base font-medium flex items-center relative transition-all duration-300 focus:outline-none
                    ${activeSection === item.id
                      ? 'text-blue-700 dark:text-blue-400'
@@ -136,7 +143,7 @@ const Header: React.FC = () => {
                  `}
                 onMouseEnter={() => setCursorVariant('button')}
                 onMouseLeave={() => setCursorVariant('default')}
-                aria-label={item.isExternal ? `Open ${item.label} in a new tab` : `Navigate to ${item.label} section`}
+                aria-label={item.isExternal ? `Open ${item.label}` : `Navigate to ${item.label} section`}
               >
                                  <span className="relative z-10 transition-all duration-300 group-hover:-translate-y-1 group-hover:scale-105 flex items-center">
                   {item.label}
@@ -201,16 +208,20 @@ const Header: React.FC = () => {
                   transition={{ delay: 0.1 + idx * 0.07, duration: 0.3, ease: 'easeOut' }}
                 >
                   <a
-                    href={item.isExternal ? item.href : `#${item.id}`}
+                    href={item.isExternal ? undefined : `#${item.id}`}
                     onClick={e => {
-                      if (!item.isExternal) {
+                      if (item.id === 'resume') {
+                        e.preventDefault();
+                        openResumeModal();
+                        setIsMenuOpen(false);
+                      } else if (!item.isExternal) {
                         e.preventDefault();
                         scrollToSection(item.id);
+                        setIsMenuOpen(false);
                       }
-                      setIsMenuOpen(false);
                     }}
-                    target={item.isExternal ? '_blank' : undefined}
-                    rel={item.isExternal ? 'noopener noreferrer' : undefined}
+                    target={item.isExternal && item.id !== 'resume' ? '_blank' : undefined}
+                    rel={item.isExternal && item.id !== 'resume' ? 'noopener noreferrer' : undefined}
                                          className={`block w-full px-4 py-3 text-lg font-medium transition-all duration-300 focus:outline-none ${
                        activeSection === item.id
                          ? 'text-blue-700 dark:text-blue-300'
@@ -218,7 +229,7 @@ const Header: React.FC = () => {
                      }`}
                     onMouseEnter={() => setCursorVariant('button')}
                     onMouseLeave={() => setCursorVariant('default')}
-                    aria-label={item.isExternal ? `Open ${item.label} in a new tab` : `Navigate to ${item.label} section`}
+                    aria-label={item.isExternal ? `Open ${item.label}` : `Navigate to ${item.label} section`}
                   >
                     {item.label}
                     {item.isExternal && <ExternalLink className="ml-2 inline" size={16} />}

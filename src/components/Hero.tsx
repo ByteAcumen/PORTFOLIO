@@ -7,8 +7,12 @@ import ProgressiveImage from './ProgressiveImage';
 import ParticleBackground from './ParticleBackground';
 import ThemeSwitcher from './ThemeSwitcher';
 
+interface HeroProps {
+  openResumeModal: () => void;
+}
+
 // Hero component
-const Hero: React.FC = () => {
+const Hero: React.FC<HeroProps> = ({ openResumeModal }) => {
   const { setCursorVariant } = useCursor();
   const [isVisible, setIsVisible] = useState(false);
 
@@ -172,7 +176,7 @@ const Hero: React.FC = () => {
                 </span>
               </motion.button>
               <motion.button
-                onClick={() => window.open('public/Resume.pdf', '_blank')}
+                onClick={openResumeModal}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.97 }}
                 className="w-full sm:w-auto px-8 py-3 bg-white dark:bg-gray-800 border border-blue-200 dark:border-gray-700 text-blue-700 dark:text-blue-300 font-medium rounded-xl shadow hover:shadow-md transition-all duration-300"

@@ -3,6 +3,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { CursorProvider } from './contexts/CursorContext';
 import Cursor from './components/Cursor';
 import ParticleBackground from './components/ParticleBackground';
+import ResumeModal from './components/ResumeModal';
 
 // Lazy-loaded components
 const LoadingScreen = lazy(() => import('./components/LoadingScreen'));
@@ -34,10 +35,16 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 const App: React.FC = () => {
   // Ensure smooth theme transitions on initial load
   const [isMounted, setIsMounted] = useState(false);
+  // Resume modal state
+  const [resumeOpen, setResumeOpen] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Function to open resume modal
+  const openResumeModal = () => setResumeOpen(true);
+  const closeResumeModal = () => setResumeOpen(false);
 
   return (
     <ThemeProvider>
@@ -54,9 +61,9 @@ const App: React.FC = () => {
             <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-gray-600 dark:text-gray-300">Loading...</div>}>
               <LoadingScreen />
               <ParticleBackground className="opacity-50 z-[-10]" /> {/* Simplified with consistent opacity */}
-              <Header />
+              <Header openResumeModal={openResumeModal} />
               <main className="relative z-10" id="main-content" role="main">
-                <Hero />
+                <Hero openResumeModal={openResumeModal} />
                 <About />
                 <Experience />
                 <Skills />
@@ -64,6 +71,7 @@ const App: React.FC = () => {
                 <Contact />
               </main>
               <Footer />
+              <ResumeModal open={resumeOpen} onClose={closeResumeModal} src="public/Resume.pdf" />
             </Suspense>
           </div>
         </ErrorBoundary>
