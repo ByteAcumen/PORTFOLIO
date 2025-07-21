@@ -69,7 +69,7 @@ const App: React.FC = () => {
                 <Contact />
               </main>
               <Footer />
-              <ResumeModal open={resumeOpen} onClose={closeResumeModal} src="public/Resume.pdf" />
+              <ResumeModal open={resumeOpen} onClose={closeResumeModal} src="/Resume.pdf" />
             </Suspense>
           </div>
         </ErrorBoundary>

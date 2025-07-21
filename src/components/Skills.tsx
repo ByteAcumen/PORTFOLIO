@@ -117,7 +117,7 @@ const InfiniteRow = React.memo(function InfiniteRow({ skills, speed = 1.2, rever
     >
       <div
         ref={rowRef}
-        className="flex w-max items-center gap-8 sm:gap-12 lg:gap-16 will-change-transform will-change-opacity"
+        className="flex w-max items-center gap-6 sm:gap-10 lg:gap-16 will-change-transform will-change-opacity"
         style={{ transform: `translateX(${scroll}px)` }}
       >
         {repeatedSkills.map((skill, index) => (
@@ -127,7 +127,7 @@ const InfiniteRow = React.memo(function InfiniteRow({ skills, speed = 1.2, rever
             style={{ animationDelay: `${(index % skills.length) * 0.07}s` }}
           >
             <div
-              className="relative h-16 w-28 sm:h-20 sm:w-32 glass rounded-xl transition-all duration-300 flex items-center justify-center"
+              className="relative h-14 w-24 sm:h-16 sm:w-28 lg:h-20 lg:w-32 glass rounded-xl transition-all duration-300 flex items-center justify-center"
             >
               <ProgressiveImage
                 src={skill.logo}
@@ -174,7 +174,7 @@ const Skills = React.memo(function Skills() {
         <ParticleBackground className="opacity-20 dark:opacity-30" />
         <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-white/5 dark:to-black/5" />
       </div>
-      <div className="container mx-auto px-6 max-w-7xl relative z-10 will-change-transform will-change-opacity animate-fadein">
+      <div className="container mx-auto px-2 sm:px-4 max-w-7xl relative z-10 will-change-transform will-change-opacity animate-fadein">
         <div className="text-center mb-12 sm:mb-16 lg:mb-20">
             <span className="inline-block px-4 py-2 bg-blue-100/80 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium mb-4 sm:mb-6 shadow-sm">
               Skills & Technologies
@@ -186,7 +186,7 @@ const Skills = React.memo(function Skills() {
               A comprehensive toolkit of modern technologies and frameworks I use to build innovative digital solutions.
             </p>
           </div>
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             <InfiniteRow skills={skillsRows[0]} speed={1.2} reverse={false} />
             <InfiniteRow skills={skillsRows[1]} speed={1.2} reverse={true} />
             <InfiniteRow skills={skillsRows[2]} speed={1.2} reverse={false} />

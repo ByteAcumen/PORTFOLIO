@@ -89,9 +89,9 @@ const Hero: React.FC<HeroProps> = React.memo(({ openResumeModal }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-white/5 dark:to-black/5" />
       </div>
       <div
-        className="w-full max-w-7xl mx-auto px-4 md:px-8 relative z-10 py-10 md:py-20 animate-fadein"
+        className="w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-8 relative z-10 py-8 sm:py-10 md:py-20 animate-fadein"
       >
-        <div className="grid lg:grid-cols-12 gap-8 lg:gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 gap-x-8 lg:gap-x-16 items-center">
           {/* Profile Image (mobile: top, desktop: right) */}
           <motion.div
             initial={{ opacity: 0, y: -30 }}
@@ -99,7 +99,7 @@ const Hero: React.FC<HeroProps> = React.memo(({ openResumeModal }) => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="block lg:hidden mb-8 w-full flex justify-center"
           >
-            <div className="relative w-40 h-40 sm:w-56 sm:h-56 flex items-center justify-center">
+            <div className="relative w-32 h-32 xs:w-40 xs:h-40 sm:w-56 sm:h-56 flex items-center justify-center">
               <motion.div
                 className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-indigo-400 opacity-60 blur-lg"
                 animate={{ scale: [1, 1.08, 1] }}
@@ -125,7 +125,7 @@ const Hero: React.FC<HeroProps> = React.memo(({ openResumeModal }) => {
 
           {/* Main Content */}
           <div
-            className="lg:col-span-7 flex flex-col items-center lg:items-start animate-fadein-left"
+            className="lg:col-span-7 flex flex-col items-center lg:items-start animate-fadein-left px-2 sm:px-0"
           >
             {/* Badges */}
             <div className="flex flex-wrap gap-3 justify-center lg:justify-start mb-8">
@@ -141,7 +141,7 @@ const Hero: React.FC<HeroProps> = React.memo(({ openResumeModal }) => {
             </div>
 
             {/* Heading */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight text-center lg:text-left">
+            <h1 className="text-3xl xs:text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight text-center lg:text-left">
               Hi, I'm{' '}
               <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 HEMANTH KUMAR
@@ -149,7 +149,7 @@ const Hero: React.FC<HeroProps> = React.memo(({ openResumeModal }) => {
             </h1>
 
             {/* Typewriter */}
-            <div className="text-2xl sm:text-3xl font-semibold mb-6 h-12 text-blue-700 dark:text-blue-400 text-center lg:text-left">
+            <div className="text-xl xs:text-2xl sm:text-3xl font-semibold mb-6 min-h-[48px] text-blue-700 dark:text-blue-400 text-center lg:text-left">
               <TypewriterEffect
                 texts={['Aspiring Full-Stack Developer', 'React & Node.js Enthusiast', 'AI/ML & Python Developer', 'Open Source Contributor']}
               />
@@ -172,7 +172,7 @@ const Hero: React.FC<HeroProps> = React.memo(({ openResumeModal }) => {
                 onClick={() => scrollToSection('contact')}
                 whileHover={{ scale: 1.05, boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.5)' }}
                 whileTap={{ scale: 0.97 }}
-                className="w-full sm:w-auto px-8 py-3 bg-blue-600 text-white font-medium rounded-xl shadow-md hover:shadow-xl transition-all duration-300"
+                className="w-full sm:w-auto min-h-[48px] px-8 py-3 bg-blue-600 text-white font-medium rounded-xl shadow-md hover:shadow-xl transition-all duration-300"
                 onMouseEnter={() => setCursorVariant('button')}
                 onMouseLeave={() => setCursorVariant('default')}
               >
@@ -184,7 +184,7 @@ const Hero: React.FC<HeroProps> = React.memo(({ openResumeModal }) => {
                 onClick={openResumeModal}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.97 }}
-                className="w-full sm:w-auto px-8 py-3 bg-white dark:bg-gray-800 border border-blue-200 dark:border-gray-700 text-blue-700 dark:text-blue-300 font-medium rounded-xl shadow hover:shadow-md transition-all duration-300"
+                className="w-full sm:w-auto min-h-[48px] px-8 py-3 bg-white dark:bg-gray-800 border border-blue-200 dark:border-gray-700 text-blue-700 dark:text-blue-300 font-medium rounded-xl shadow hover:shadow-md transition-all duration-300"
                 onMouseEnter={() => setCursorVariant('button')}
                 onMouseLeave={() => setCursorVariant('default')}
               >
@@ -195,13 +195,14 @@ const Hero: React.FC<HeroProps> = React.memo(({ openResumeModal }) => {
             </div>
 
             {/* Social Links */}
-            <div className="mt-4 flex items-center justify-center lg:justify-start gap-6">
+            <div className="mt-4 flex items-center justify-center lg:justify-start gap-4 sm:gap-6">
               <motion.a
                 href="https://github.com/ByteAcumen"
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ y: -5, scale: 1.1 }}
-                className="text-gray-500 hover:text-blue-700 dark:text-gray-400 dark:hover:text-blue-400 transition-colors relative group"
+                className="text-gray-500 hover:text-blue-700 dark:text-gray-400 dark:hover:text-blue-400 transition-colors relative group text-2xl sm:text-[22px]"
+                style={{ minWidth: 44, minHeight: 44 }}
                 onMouseEnter={() => setCursorVariant('button')}
                 onMouseLeave={() => setCursorVariant('default')}
               >
@@ -213,7 +214,8 @@ const Hero: React.FC<HeroProps> = React.memo(({ openResumeModal }) => {
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ y: -5, scale: 1.1 }}
-                className="text-gray-500 hover:text-blue-700 dark:text-gray-400 dark:hover:text-blue-400 transition-colors relative group"
+                className="text-gray-500 hover:text-blue-700 dark:text-gray-400 dark:hover:text-blue-400 transition-colors relative group text-2xl sm:text-[22px]"
+                style={{ minWidth: 44, minHeight: 44 }}
                 onMouseEnter={() => setCursorVariant('button')}
                 onMouseLeave={() => setCursorVariant('default')}
               >
@@ -225,7 +227,8 @@ const Hero: React.FC<HeroProps> = React.memo(({ openResumeModal }) => {
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ y: -5, scale: 1.1 }}
-                className="text-gray-500 hover:text-blue-700 dark:text-gray-400 dark:hover:text-blue-400 transition-colors relative group"
+                className="text-gray-500 hover:text-blue-700 dark:text-gray-400 dark:hover:text-blue-400 transition-colors relative group text-2xl sm:text-[22px]"
+                style={{ minWidth: 44, minHeight: 44 }}
                 onMouseEnter={() => setCursorVariant('button')}
                 onMouseLeave={() => setCursorVariant('default')}
               >
@@ -239,7 +242,7 @@ const Hero: React.FC<HeroProps> = React.memo(({ openResumeModal }) => {
           <div
             className="hidden lg:flex mt-12 lg:mt-0 lg:col-span-5 justify-center animate-fadein-right"
           >
-            <div className="relative w-64 h-64 sm:w-80 sm:h-80 flex items-center justify-center">
+            <div className="relative w-40 h-40 sm:w-64 sm:h-64 md:w-80 md:h-80 flex items-center justify-center">
               <motion.div
                 className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-indigo-400 opacity-60 blur-lg"
                 animate={{ scale: [1, 1.08, 1] }}

@@ -158,7 +158,7 @@ const Header: React.FC<HeaderProps> = React.memo(({ openResumeModal }) => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.7, ease: 'easeOut' }}
       />
-      <div className="container mx-auto px-2 md:px-6 flex items-center justify-between relative z-10 min-h-[64px]">
+      <div className="w-full max-w-screen-xl mx-auto px-2 md:px-6 flex items-center justify-between relative z-10 min-h-[64px] pt-safe-top">
         {/* Logo and Name */}
         <a
           href="#home"
@@ -244,7 +244,7 @@ const Header: React.FC<HeaderProps> = React.memo(({ openResumeModal }) => {
 
         {/* Mobile Hamburger */}
         <button
-          className="md:hidden flex flex-col justify-center items-center w-10 h-10 focus:outline-none bg-transparent ml-2 transition-all duration-300 hover:scale-110"
+          className="md:hidden flex flex-col justify-center items-center w-12 h-12 focus:outline-none bg-transparent ml-2 transition-all duration-300 hover:scale-110 rounded-full active:bg-blue-100 dark:active:bg-blue-900"
           aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={isMenuOpen}
           aria-controls="mobile-menu"
@@ -267,7 +267,7 @@ const Header: React.FC<HeaderProps> = React.memo(({ openResumeModal }) => {
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - Dropdown below header */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.nav
@@ -276,7 +276,7 @@ const Header: React.FC<HeaderProps> = React.memo(({ openResumeModal }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -24 }}
             transition={{ duration: 0.32, ease: 'easeOut' }}
-            className="md:hidden absolute top-full left-0 w-full glass z-40 shadow-2xl rounded-b-2xl"
+            className="md:hidden absolute top-full left-0 w-full z-50 shadow-2xl rounded-b-2xl overflow-y-auto max-h-[80vh]"
             aria-label="Mobile navigation"
             role="navigation"
             style={{
@@ -284,43 +284,57 @@ const Header: React.FC<HeaderProps> = React.memo(({ openResumeModal }) => {
               borderBottomRightRadius: '1.25rem',
             }}
           >
-            <ul className="flex flex-col gap-2 py-4 px-6 animate-fadein-up">
-              {memoizedNavItems.map((item) => (
-                <li key={item.id}>
-                  <a
-                    href={item.isExternal ? undefined : `#${item.id}`}
-                    onClick={e => {
-                      if (item.id === 'resume') {
-                        e.preventDefault();
-                        openResumeModal();
-                        setIsMenuOpen(false);
-                      } else if (!item.isExternal) {
-                        e.preventDefault();
-                        scrollToSection(item.id);
-                        setIsMenuOpen(false);
-                      }
-                    }}
-                    target={item.isExternal && item.id !== 'resume' ? '_blank' : undefined}
-                    rel={item.isExternal && item.id !== 'resume' ? 'noopener noreferrer' : undefined}
-                    className={`block w-full px-4 py-3 text-lg font-medium transition-all duration-300 focus:outline-none rounded-xl ${
-                      activeSection === item.id
-                        ? 'text-blue-700 dark:text-blue-300 bg-blue-50/60 dark:bg-blue-900/30'
-                        : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50/40 dark:hover:bg-blue-900/20'
-                    }`}
-                    onMouseEnter={() => setCursorVariant('button')}
-                    onMouseLeave={() => setCursorVariant('default')}
-                    aria-label={item.isExternal ? `Open ${item.label}` : `Navigate to ${item.label} section`}
-                    tabIndex={0}
-                  >
-                    {item.label}
-                    {item.isExternal && <ExternalLink className="ml-2 inline" size={16} />}
-                  </a>
+            {/* Glassy semi-opaque background for better contrast */}
+            <div className="absolute inset-0 bg-white/60 dark:bg-gray-900/70 backdrop-blur-md rounded-b-2xl pointer-events-none" />
+            <div className="relative z-10">
+              {/* Close button inside menu, top right */}
+              <button
+                className="absolute top-3 right-3 w-10 h-10 rounded-full flex items-center justify-center bg-black/30 dark:bg-white/10 text-white dark:text-gray-200 hover:bg-white hover:text-gray-900 dark:hover:bg-gray-200 dark:hover:text-gray-900 transition-colors z-70 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-label="Close menu"
+                onClick={() => setIsMenuOpen(false)}
+                tabIndex={0}
+              >
+                <span className="text-2xl">✕</span>
+              </button>
+              <ul className="flex flex-col gap-2 py-4 px-2 sm:px-6 animate-fadein-up">
+                {memoizedNavItems.map((item) => (
+                  <li key={item.id}>
+                    <a
+                      href={item.isExternal ? undefined : `#${item.id}`}
+                      onClick={e => {
+                        if (item.id === 'resume') {
+                          e.preventDefault();
+                          openResumeModal();
+                          setIsMenuOpen(false);
+                        } else if (!item.isExternal) {
+                          e.preventDefault();
+                          scrollToSection(item.id);
+                          setIsMenuOpen(false);
+                        }
+                      }}
+                      target={item.isExternal && item.id !== 'resume' ? '_blank' : undefined}
+                      rel={item.isExternal && item.id !== 'resume' ? 'noopener noreferrer' : undefined}
+                      className={`block w-full px-4 py-4 text-lg sm:text-lg font-semibold transition-all duration-300 focus:outline-none rounded-xl text-center ${
+                        activeSection === item.id
+                          ? 'text-blue-700 dark:text-blue-300 bg-blue-50/60 dark:bg-blue-900/30'
+                          : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50/40 dark:hover:bg-blue-900/20'
+                      }`}
+                      style={{ minHeight: 56 }}
+                      onMouseEnter={() => setCursorVariant('button')}
+                      onMouseLeave={() => setCursorVariant('default')}
+                      aria-label={item.isExternal ? `Open ${item.label}` : `Navigate to ${item.label} section`}
+                      tabIndex={0}
+                    >
+                      {item.label}
+                      {item.isExternal && <ExternalLink className="ml-2 inline" size={16} />}
+                    </a>
+                  </li>
+                ))}
+                <li className="mt-2 flex justify-center">
+                  <ThemeSwitcher />
                 </li>
-              ))}
-              <li className="mt-2 flex justify-center">
-                <ThemeSwitcher />
-              </li>
-            </ul>
+              </ul>
+            </div>
           </motion.nav>
         )}
       </AnimatePresence>

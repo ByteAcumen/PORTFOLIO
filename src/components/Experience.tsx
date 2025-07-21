@@ -1,33 +1,12 @@
 import React, { useRef, useEffect } from 'react';
-import { motion, useAnimation } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
+import { motion } from 'framer-motion';
 import { Briefcase, Calendar, MapPin, Code, Star, GraduationCap, ExternalLink, Target, } from 'lucide-react';
 import { useCursor } from '../contexts/useCursor';
 import ParticleBackground from './ParticleBackground';
 import { AnimatePresence } from 'framer-motion';
 import ProgressiveImage from './ProgressiveImage';
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 30, scale: 0.95 }, 
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      duration: 0.6,
-      delay: 0.2 + i * 0.1,
-      ease: [0.25, 0.46, 0.45, 0.94],
-    },
-  }),
-  hover: {
-    y: -6,
-    scale: 1.02,
-    transition: {
-      duration: 0.3,
-      ease: [0.4, 0, 0.2, 1],
-    },
-  },
-};
+// cardVariants and useAnimation are no longer needed
 
 const Experience: React.FC = React.memo(() => {
   const { setCursorVariant } = useCursor();
@@ -199,13 +178,12 @@ const Experience: React.FC = React.memo(() => {
         <ParticleBackground className="opacity-20 dark:opacity-30" />
         <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-white/5 dark:to-black/5" />
       </div>
-      <div className="container mx-auto px-6 max-w-6xl relative z-10 will-change-transform will-change-opacity">
+      <div className="container mx-auto px-2 sm:px-4 max-w-6xl relative z-10 will-change-transform will-change-opacity">
         <div className="text-center mb-12 sm:mb-16 lg:mb-20 animate-fadein">
           <motion.span 
             className="inline-block px-4 py-2 bg-blue-100/80 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium mb-4 sm:mb-6 shadow-sm"
             initial={{ opacity: 0, y: -10 }}
-            animate={useAnimation()}
-            variants={{ visible: { opacity: 1, y: 0, transition: { duration: 0.6, delay: 0.2 } } }}
+            animate={{ opacity: 1, y: 0, transition: { duration: 0.6, delay: 0.2 } }}
           >
             Experience
           </motion.span>
@@ -219,8 +197,7 @@ const Experience: React.FC = React.memo(() => {
           <motion.p 
             className="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed px-4"
             initial={{ opacity: 0 }}
-            animate={useAnimation()}
-            variants={{ visible: { opacity: 1, transition: { duration: 0.6, delay: 0.4 } } }}
+            animate={{ opacity: 1, transition: { duration: 0.6, delay: 0.4 } }}
           >
             My internships and professional experience in web development and artificial intelligence.
           </motion.p>
@@ -232,11 +209,11 @@ const Experience: React.FC = React.memo(() => {
               key={exp.id}
               className="relative animate-fadein-up"
             >
-              <div className="grid lg:grid-cols-12 gap-6 sm:gap-8 items-stretch">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-8 gap-x-6 sm:gap-x-8 items-stretch">
                 {/* Left Column: Company Info */}
-                <div className="lg:col-span-4">
+                <div className="lg:col-span-4 w-full max-w-md mx-auto">
                   <div 
-                    className="glass p-6 sm:p-8 rounded-2xl h-full flex flex-col items-center justify-center text-center transition-all duration-300"
+                    className="glass p-5 sm:p-8 rounded-2xl h-full flex flex-col items-center justify-center text-center transition-all duration-300 w-full"
                   >
                     {/* Company Logo */}
                     <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden mb-4 sm:mb-6 border-2 border-gray-200 dark:border-gray-600">
@@ -247,7 +224,7 @@ const Experience: React.FC = React.memo(() => {
                       />
                     </div>
                     
-                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2">{exp.company}</h3>
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2 text-center w-full">{exp.company}</h3>
                     <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">{exp.location}</p>
                     
                     <div className="flex items-center text-sm text-gray-700 dark:text-gray-300 mb-6">
@@ -268,12 +245,12 @@ const Experience: React.FC = React.memo(() => {
                 </div>
                 
                 {/* Right Column: Experience Details */}
-                <div className="lg:col-span-8">
+                <div className="lg:col-span-8 w-full max-w-2xl mx-auto">
                   <div 
-                    className="glass p-6 sm:p-8 rounded-2xl h-full flex flex-col transition-all duration-300"
+                    className="glass p-5 sm:p-8 rounded-2xl h-full flex flex-col transition-all duration-300 w-full"
                   >
                     <div className="mb-6">
-                      <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-3 tracking-tight">{exp.role}</h3>
+                      <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-3 tracking-tight text-center w-full">{exp.role}</h3>
                       <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4">
                         <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-gradient-to-r ${exp.bgColor} bg-opacity-10 text-blue-800 dark:text-blue-200`}>
                           <Briefcase size={12} className="mr-1" />
@@ -302,19 +279,13 @@ const Experience: React.FC = React.memo(() => {
                       </h4>
                       <div className="flex flex-wrap gap-2">
                         {exp.skills.map((skill, skillIndex) => (
-                          <motion.span 
-                            key={skillIndex} 
+                          <span
+                            key={skillIndex}
                             className="px-3 py-1.5 bg-blue-50/80 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 rounded-lg text-xs font-medium flex items-center transition-all duration-200 hover:bg-blue-100/90 dark:hover:bg-blue-800/50 hover:scale-105"
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={useAnimation()}
-                            variants={{
-                              visible: { opacity: 1, scale: 1, transition: { delay: 0.6 + (skillIndex * 0.1) } }
-                            }}
-                            whileHover={{ y: -2, scale: 1.05 }}
                           >
                             <Star size={12} className="mr-1" />
                             {skill}
-                          </motion.span>
+                          </span>
                         ))}
                       </div>
                     </div>
@@ -327,18 +298,13 @@ const Experience: React.FC = React.memo(() => {
                       </h4>
                       <ul className="space-y-3">
                         {exp.responsibilities.map((responsibility, respIndex) => (
-                          <motion.li 
+                          <li
                             key={respIndex}
                             className="flex items-start group"
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={useAnimation()}
-                            variants={{
-                              visible: { opacity: 1, x: 0, transition: { delay: 0.8 + (respIndex * 0.1) } }
-                            }}
                           >
                             <div className="flex-shrink-0 w-2 h-2 rounded-full bg-blue-400 mt-2 mr-3 group-hover:scale-125 transition-transform duration-200"></div>
                             <span className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">{responsibility}</span>
-                          </motion.li>
+                          </li>
                         ))}
                       </ul>
                     </div>
@@ -360,10 +326,7 @@ const Experience: React.FC = React.memo(() => {
             <motion.span 
               className="inline-block px-4 py-2 bg-green-100/80 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full text-sm font-medium mb-4 sm:mb-6 shadow-sm"
               initial={{ opacity: 0, y: -10 }}
-              animate={useAnimation()}
-              variants={{
-                visible: { opacity: 1, y: 0, transition: { duration: 0.6, delay: 1.0 } }
-              }}
+              animate={{ opacity: 1, y: 0, transition: { duration: 0.6, delay: 1.0 } }}
             >
               Education
             </motion.span>
@@ -379,9 +342,9 @@ const Experience: React.FC = React.memo(() => {
           <div
             className="glass rounded-2xl p-6 sm:p-8 transition-all duration-300"
           >
-            <div className="grid lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-8 gap-x-6 sm:gap-x-8 lg:gap-x-10 items-start">
               {/* Left Column: University Info */}
-              <div className="lg:col-span-4 text-center">
+              <div className="lg:col-span-4 text-center w-full max-w-md mx-auto">
                 <div className="relative w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 mx-auto mb-4 sm:mb-6 rounded-xl overflow-hidden border-2 border-gray-200/50 dark:border-gray-600/50">
                   <ProgressiveImage
                     src="/1631348977484.jpeg"
@@ -400,7 +363,7 @@ const Experience: React.FC = React.memo(() => {
               </div>
               
               {/* Right Column: Education Details */}
-              <div className="lg:col-span-8">
+              <div className="lg:col-span-8 w-full max-w-2xl mx-auto">
                 <div className="mb-6">
                   <h4 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-3 flex items-center tracking-tight">
                     Bachelor of Technology
@@ -436,10 +399,7 @@ const Experience: React.FC = React.memo(() => {
                         key={idx}
                         className="px-3 sm:px-4 py-2 bg-gray-50/80 dark:bg-gray-700/50 rounded-lg text-gray-700 dark:text-gray-200 text-sm font-medium transition-all duration-200 hover:bg-gray-100/90 dark:hover:bg-gray-600/60 hover:scale-105"
                         initial={{ opacity: 0, y: 10 }}
-                        animate={useAnimation()}
-                        variants={{
-                          visible: { opacity: 1, y: 0, transition: { delay: 1.2 + (idx * 0.05) } }
-                        }}
+                        animate={{ opacity: 1, y: 0, transition: { delay: 1.2 + (idx * 0.05) } }}
                         whileHover={{ y: -2, scale: 1.05 }}
                       >
                         {course}

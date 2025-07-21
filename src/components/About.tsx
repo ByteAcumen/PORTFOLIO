@@ -98,7 +98,7 @@ const About: React.FC = React.memo(() => {
         <ParticleBackground className="opacity-20 dark:opacity-30" />
         <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-white/5 dark:to-black/5" />
       </div>
-      <div className="container mx-auto px-6 max-w-6xl relative z-10 will-change-transform will-change-opacity">
+      <div className="container mx-auto px-2 sm:px-4 max-w-6xl relative z-10 will-change-transform will-change-opacity">
         <span 
           className="inline-block px-4 py-2 bg-blue-100/80 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium mb-4 sm:mb-6 shadow-sm animate-fadein"
         >
@@ -117,18 +117,18 @@ const About: React.FC = React.memo(() => {
           A passionate final-year Computer Science student from Bangalore, India, specializing in full-stack development and AI/ML technologies with a love for open-source contribution and hackathon participation.
         </p>
         {/* Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 justify-center items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 gap-y-8 justify-center items-stretch">
           {cards.map((card, i) => (
             <div
               key={card.title}
-              className="group h-full animate-fadein-up"
+              className="group h-full w-full max-w-md mx-auto animate-fadein-up"
             >
-              <div className="flex flex-col items-start justify-start glass p-6 sm:p-8 rounded-2xl h-full transition-all duration-300">
-                <div className="flex items-center mb-4 sm:mb-5">
+              <div className="flex flex-col items-start justify-start glass p-5 sm:p-8 rounded-2xl h-full transition-all duration-300 w-full">
+                <div className="flex items-center mb-4 sm:mb-5 w-full">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl bg-blue-50/80 dark:bg-blue-900/30 mr-3 sm:mr-4 transition-all duration-300 group-hover:scale-110">
                     {card.icon}
                   </div>
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white tracking-tight">{card.title}</h3>
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white tracking-tight text-center w-full">{card.title}</h3>
                 </div>
                 <div className="flex-1 w-full">{card.content}</div>
               </div>
