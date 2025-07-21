@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import ParticleBackground from './ParticleBackground';
 import ProgressiveImage from './ProgressiveImage';
 import React from 'react';
@@ -110,43 +109,38 @@ const InfiniteRow = React.memo(function InfiniteRow({ skills, speed = 1.2, rever
   const repeatedSkills = Array.from({ length: repeatCount }, () => skills).flat();
 
   return (
-    <div ref={containerRef} className="relative w-full overflow-hidden touch-pan-x will-change-transform will-change-opacity"
+    <div ref={containerRef} className="relative w-full overflow-hidden touch-pan-x will-change-transform will-change-opacity animate-fadein-up"
       style={{
         maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
         WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
       }}
     >
-      <motion.div
+      <div
         ref={rowRef}
         className="flex w-max items-center gap-8 sm:gap-12 lg:gap-16 will-change-transform will-change-opacity"
-        style={{ x: scroll }}
-        transition={{ ease: "linear", duration: 0.4 }}
+        style={{ transform: `translateX(${scroll}px)` }}
       >
         {repeatedSkills.map((skill, index) => (
-          <motion.div
+          <div
             key={`${skill.name}-${index}`}
-            className="flex-shrink-0"
-            initial={{ opacity: 0, scale: 0.92, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: (index % skills.length) * 0.07 }}
-            whileHover={{ scale: 1.12, boxShadow: "0 6px 24px 0 rgba(60,60,60,0.13)", y: -8, transition: { duration: 0.22 } }}
+            className="flex-shrink-0 animate-fadein-up"
+            style={{ animationDelay: `${(index % skills.length) * 0.07}s` }}
           >
-            <motion.div
-              className="relative h-16 w-28 sm:h-20 sm:w-32 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-lg transition-all duration-300 flex items-center justify-center"
-              whileTap={{ scale: 0.97 }}
+            <div
+              className="relative h-16 w-28 sm:h-20 sm:w-32 glass rounded-xl transition-all duration-300 flex items-center justify-center"
             >
               <ProgressiveImage
                 src={skill.logo}
                 alt={skill.name}
                 className="object-contain p-2 sm:p-3 w-full h-full"
               />
-            </motion.div>
+            </div>
             <span className="block mt-2 text-xs sm:text-sm text-gray-800 dark:text-gray-100 text-center font-medium truncate w-full">
               {skill.name}
             </span>
-          </motion.div>
+          </div>
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 });
@@ -159,7 +153,7 @@ const Skills = React.memo(function Skills() {
   );
 
   return (
-    <section className="py-20 sm:py-24 lg:py-28 min-h-[600px] relative overflow-hidden transition-colors duration-300">
+    <section className="py-20 sm:py-24 lg:py-28 min-h-[600px] relative overflow-hidden transition-colors duration-300 animate-fadein">
       {/* Hero-style Background */}
       <div className="absolute inset-0 z-0 pointer-events-none will-change-transform will-change-opacity">
         {/* Light Theme */}
@@ -180,13 +174,8 @@ const Skills = React.memo(function Skills() {
         <ParticleBackground className="opacity-20 dark:opacity-30" />
         <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-white/5 dark:to-black/5" />
       </div>
-      <div className="container mx-auto px-6 max-w-7xl relative z-10 will-change-transform will-change-opacity">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, type: 'spring' }}
-        >
-          <div className="text-center mb-12 sm:mb-16 lg:mb-20">
+      <div className="container mx-auto px-6 max-w-7xl relative z-10 will-change-transform will-change-opacity animate-fadein">
+        <div className="text-center mb-12 sm:mb-16 lg:mb-20">
             <span className="inline-block px-4 py-2 bg-blue-100/80 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium mb-4 sm:mb-6 shadow-sm">
               Skills & Technologies
             </span>
@@ -202,8 +191,7 @@ const Skills = React.memo(function Skills() {
             <InfiniteRow skills={skillsRows[1]} speed={1.2} reverse={true} />
             <InfiniteRow skills={skillsRows[2]} speed={1.2} reverse={false} />
           </div>
-        </motion.div>
-      </div>
+        </div>
     </section>
   );
 });

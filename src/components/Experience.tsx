@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { Briefcase, Calendar, MapPin, Code, Star, GraduationCap, ExternalLink, Target, } from 'lucide-react';
@@ -31,18 +31,43 @@ const cardVariants = {
 
 const Experience: React.FC = React.memo(() => {
   const { setCursorVariant } = useCursor();
-  const controls = useAnimation();
-  const [ref, inView] = useInView({
-    threshold: 0.1,
-    triggerOnce: true
-  });
   const [showModal, setShowModal] = React.useState<{ open: boolean; src: string | null; title: string }>({ open: false, src: null, title: '' });
+  const [pdfLoading, setPdfLoading] = React.useState(false);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (inView) {
-      controls.start('visible');
+    // Focus trap for modal
+    if (showModal.open && modalRef.current) {
+      const focusableEls = modalRef.current.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      const firstEl = focusableEls[0];
+      const lastEl = focusableEls[focusableEls.length - 1];
+      const handleTab = (e: KeyboardEvent) => {
+        if (e.key === 'Tab') {
+          if (document.activeElement === lastEl && !e.shiftKey) {
+            e.preventDefault();
+            firstEl.focus();
+          } else if (document.activeElement === firstEl && e.shiftKey) {
+            e.preventDefault();
+            lastEl.focus();
+          }
+        }
+      };
+      const handleEsc = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') setShowModal({ open: false, src: null, title: '' });
+      };
+      document.addEventListener('keydown', handleTab);
+      document.addEventListener('keydown', handleEsc);
+      // Focus close button
+      closeBtnRef.current?.focus();
+      return () => {
+        document.removeEventListener('keydown', handleTab);
+        document.removeEventListener('keydown', handleEsc);
+      };
     }
-  }, [controls, inView]);
+  }, [showModal.open]);
   
   const experiences = [
     {
@@ -84,7 +109,7 @@ const Experience: React.FC = React.memo(() => {
   ];
 
   return (
-    <section id="experience" ref={ref} className="py-28 min-h-[600px] relative overflow-hidden transition-colors duration-300">
+    <section id="experience" className="py-28 min-h-[600px] relative overflow-hidden transition-colors duration-300 animate-fadein">
       {/* Resume Modal */}
       <AnimatePresence>
         {showModal.open && (
@@ -92,36 +117,60 @@ const Experience: React.FC = React.memo(() => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-sm"
             onClick={() => setShowModal({ open: false, src: null, title: '' })}
+            aria-modal="true"
+            role="dialog"
+            aria-label={showModal.title || 'Certificate Modal'}
           >
             <motion.div
+              ref={modalRef}
               initial={{ opacity: 0, scale: 0.92 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.92 }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden relative"
+              className="glass rounded-2xl shadow-2xl w-full max-w-3xl max-h-[95vh] flex flex-col relative focus:outline-none"
               onClick={e => e.stopPropagation()}
+              tabIndex={0}
             >
-              <button
-                onClick={() => setShowModal({ open: false, src: null, title: '' })}
-                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/20 dark:bg-white/10 flex items-center justify-center text-white dark:text-gray-200 hover:bg-white hover:text-gray-900 dark:hover:bg-gray-200 dark:hover:text-gray-900 transition-colors z-10"
-                aria-label={`Close ${showModal.title}`}
-              >
-                ✕
-              </button>
-              <div className="w-full h-[80vh] bg-gray-100 dark:bg-gray-800 flex items-center justify-center relative select-none">
+              <div className="flex items-center justify-between px-6 pt-6 pb-2">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate" id="modal-title">{showModal.title}</h2>
+                <button
+                  ref={closeBtnRef}
+                  onClick={() => setShowModal({ open: false, src: null, title: '' })}
+                  className="w-10 h-10 rounded-full bg-black/20 dark:bg-white/10 flex items-center justify-center text-white dark:text-gray-200 hover:bg-white hover:text-gray-900 dark:hover:bg-gray-200 dark:hover:text-gray-900 transition-colors z-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  aria-label={`Close ${showModal.title}`}
+                  tabIndex={0}
+                >
+                  <motion.span whileHover={{ rotate: 90 }} transition={{ type: 'spring', stiffness: 400 }} className="text-2xl">✕</motion.span>
+                </button>
+              </div>
+              <div className="w-full flex-1 flex items-center justify-center relative select-none px-2 pb-4">
                 {showModal.src && (
-                  <iframe
-                    src={showModal.src}
-                    title={`${showModal.title} PDF`}
-                    className="w-full h-full border-0 rounded-b-2xl"
-                    loading="lazy"
-                  />
+                  <>
+                    {pdfLoading && (
+                      <div className="absolute inset-0 flex items-center justify-center z-20">
+                        <svg className="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      </div>
+                    )}
+                    <iframe
+                      src={showModal.src}
+                      title={`${showModal.title} PDF`}
+                      className="w-full h-[60vh] sm:h-[80vh] rounded-b-2xl border-0 relative z-10 bg-white dark:bg-gray-900"
+                      loading="lazy"
+                      style={{ minHeight: 240, pointerEvents: 'auto', background: 'inherit' }}
+                      tabIndex={0}
+                      onLoad={() => setPdfLoading(false)}
+                      onLoadStart={() => setPdfLoading(true)}
+                    />
+                  </>
                 )}
-                {/* Overlay to block right-click/context menu */}
+                {/* Overlay to block right-click/context menu only over iframe */}
                 <div
-                  style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10 }}
+                  style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 11, pointerEvents: 'none' }}
                   onContextMenu={e => e.preventDefault()}
                   tabIndex={-1}
                 />
@@ -151,16 +200,11 @@ const Experience: React.FC = React.memo(() => {
         <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-white/5 dark:to-black/5" />
       </div>
       <div className="container mx-auto px-6 max-w-6xl relative z-10 will-change-transform will-change-opacity">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={controls}
-          variants={{ visible: { opacity: 1, y: 0, transition: { duration: 0.7, type: 'spring' } } }}
-          className="text-center mb-12 sm:mb-16 lg:mb-20"
-        >
+        <div className="text-center mb-12 sm:mb-16 lg:mb-20 animate-fadein">
           <motion.span 
             className="inline-block px-4 py-2 bg-blue-100/80 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium mb-4 sm:mb-6 shadow-sm"
             initial={{ opacity: 0, y: -10 }}
-            animate={controls}
+            animate={useAnimation()}
             variants={{ visible: { opacity: 1, y: 0, transition: { duration: 0.6, delay: 0.2 } } }}
           >
             Experience
@@ -175,30 +219,24 @@ const Experience: React.FC = React.memo(() => {
           <motion.p 
             className="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed px-4"
             initial={{ opacity: 0 }}
-            animate={controls}
+            animate={useAnimation()}
             variants={{ visible: { opacity: 1, transition: { duration: 0.6, delay: 0.4 } } }}
           >
             My internships and professional experience in web development and artificial intelligence.
           </motion.p>
-        </motion.div>
+        </div>
         {/* Experience Cards */}
         <div className="space-y-12">
           {experiences.map((exp, index) => (
-            <motion.div
+            <div
               key={exp.id}
-              custom={index}
-              initial="hidden"
-              animate={controls}
-              variants={cardVariants}
-              whileHover="hover"
-              className="relative"
+              className="relative animate-fadein-up"
             >
               <div className="grid lg:grid-cols-12 gap-6 sm:gap-8 items-stretch">
                 {/* Left Column: Company Info */}
                 <div className="lg:col-span-4">
-                  <motion.div 
-                    className="bg-white/80 dark:bg-gray-900/80 p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 h-full flex flex-col items-center justify-center text-center backdrop-blur-sm hover:bg-white/95 dark:hover:bg-gray-900/95 hover:shadow-xl transition-all duration-300"
-                    whileHover={{ y: -5, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.1)" }}
+                  <div 
+                    className="glass p-6 sm:p-8 rounded-2xl h-full flex flex-col items-center justify-center text-center transition-all duration-300"
                   >
                     {/* Company Logo */}
                     <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden mb-4 sm:mb-6 border-2 border-gray-200 dark:border-gray-600">
@@ -226,14 +264,13 @@ const Experience: React.FC = React.memo(() => {
                       <span>View Certificate</span>
                       <ExternalLink size={14} className="ml-2" />
                     </motion.a>
-                  </motion.div>
+                  </div>
                 </div>
                 
                 {/* Right Column: Experience Details */}
                 <div className="lg:col-span-8">
-                  <motion.div 
-                    className="bg-white/80 dark:bg-gray-900/80 p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 h-full backdrop-blur-sm hover:bg-white/95 dark:hover:bg-gray-900/95 hover:shadow-xl transition-all duration-300 flex flex-col"
-                    whileHover={{ y: -5, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.1)" }}
+                  <div 
+                    className="glass p-6 sm:p-8 rounded-2xl h-full flex flex-col transition-all duration-300"
                   >
                     <div className="mb-6">
                       <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-3 tracking-tight">{exp.role}</h3>
@@ -269,7 +306,7 @@ const Experience: React.FC = React.memo(() => {
                             key={skillIndex} 
                             className="px-3 py-1.5 bg-blue-50/80 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 rounded-lg text-xs font-medium flex items-center transition-all duration-200 hover:bg-blue-100/90 dark:hover:bg-blue-800/50 hover:scale-105"
                             initial={{ opacity: 0, scale: 0.8 }}
-                            animate={controls}
+                            animate={useAnimation()}
                             variants={{
                               visible: { opacity: 1, scale: 1, transition: { delay: 0.6 + (skillIndex * 0.1) } }
                             }}
@@ -294,7 +331,7 @@ const Experience: React.FC = React.memo(() => {
                             key={respIndex}
                             className="flex items-start group"
                             initial={{ opacity: 0, x: -20 }}
-                            animate={controls}
+                            animate={useAnimation()}
                             variants={{
                               visible: { opacity: 1, x: 0, transition: { delay: 0.8 + (respIndex * 0.1) } }
                             }}
@@ -305,7 +342,7 @@ const Experience: React.FC = React.memo(() => {
                         ))}
                       </ul>
                     </div>
-                  </motion.div>
+                  </div>
                 </div>
               </div>
               
@@ -313,24 +350,17 @@ const Experience: React.FC = React.memo(() => {
               {index !== experiences.length - 1 && (
                 <div className="hidden lg:block w-1 h-16 bg-gradient-to-b from-blue-500 to-indigo-500 mx-auto my-8 opacity-40"></div>
               )}
-            </motion.div>
+            </div>
           ))}
         </div>
         
         {/* Education Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={controls}
-          variants={{
-            visible: { opacity: 1, y: 0, transition: { duration: 0.7, delay: 0.8 } }
-          }}
-          className="mt-20 sm:mt-24"
-        >
+        <div className="mt-20 sm:mt-24 animate-fadein-up">
           <div className="text-center mb-12">
             <motion.span 
               className="inline-block px-4 py-2 bg-green-100/80 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full text-sm font-medium mb-4 sm:mb-6 shadow-sm"
               initial={{ opacity: 0, y: -10 }}
-              animate={controls}
+              animate={useAnimation()}
               variants={{
                 visible: { opacity: 1, y: 0, transition: { duration: 0.6, delay: 1.0 } }
               }}
@@ -346,9 +376,8 @@ const Experience: React.FC = React.memo(() => {
             </motion.h3>
           </div>
           
-          <motion.div
-            className="bg-white/80 dark:bg-gray-900/80 rounded-2xl p-6 sm:p-8 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm hover:bg-white/95 dark:hover:bg-gray-900/95 hover:shadow-xl transition-all duration-300"
-            whileHover={{ y: -5, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.1)" }}
+          <div
+            className="glass rounded-2xl p-6 sm:p-8 transition-all duration-300"
           >
             <div className="grid lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 items-start">
               {/* Left Column: University Info */}
@@ -407,7 +436,7 @@ const Experience: React.FC = React.memo(() => {
                         key={idx}
                         className="px-3 sm:px-4 py-2 bg-gray-50/80 dark:bg-gray-700/50 rounded-lg text-gray-700 dark:text-gray-200 text-sm font-medium transition-all duration-200 hover:bg-gray-100/90 dark:hover:bg-gray-600/60 hover:scale-105"
                         initial={{ opacity: 0, y: 10 }}
-                        animate={controls}
+                        animate={useAnimation()}
                         variants={{
                           visible: { opacity: 1, y: 0, transition: { delay: 1.2 + (idx * 0.05) } }
                         }}
@@ -420,8 +449,8 @@ const Experience: React.FC = React.memo(() => {
                 </div>
               </div>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
     </section>
   );

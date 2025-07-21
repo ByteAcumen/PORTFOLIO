@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useTheme } from '../contexts/useTheme';
 import { useCursor } from '../contexts/useCursor';
 import { ExternalLink } from 'lucide-react';
@@ -21,108 +21,174 @@ const navItems: NavLink[] = [
   { id: 'skills', label: 'Skills' },
   { id: 'portfolio', label: 'Portfolio' },
   { id: 'contact', label: 'Contact' },
-  { id: 'resume', label: 'Resume', isExternal: true }, // Remove href
+  { id: 'resume', label: 'Resume', isExternal: true },
 ];
 
 interface HeaderProps {
   openResumeModal: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ openResumeModal }) => {
+// Use the unified glass class for consistent glassmorphism
+const glassBg = 'glass';
+
+const Header: React.FC<HeaderProps> = React.memo(({ openResumeModal }) => {
   const { isDark } = useTheme();
   const { setCursorVariant } = useCursor();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
+  const tickingRef = useRef(false);
+  const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
+  const sectionIds = ['home', 'about', 'experience', 'skills', 'portfolio', 'contact'];
 
-  // Handle scroll for sticky header and active section
+  // Cache section elements on mount and after lazy components load
+  const recacheSections = useCallback(() => {
+    sectionIds.forEach(id => {
+      sectionRefs.current[id] = document.getElementById(id);
+    });
+  }, [sectionIds]);
   useEffect(() => {
+    recacheSections();
+    // Also recache after Suspense resolves (all main sections loaded)
+    setTimeout(recacheSections, 1200); // 1.2s after mount for lazy load
+  }, [recacheSections]);
+
+  // Debounced scroll handler for sticky header and active section
+  useEffect(() => {
+    let lastCall = 0;
+    const debounce = 60; // ms
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-
-      // Track active section based on scroll position
-      const sections = ['home', 'about', 'experience', 'skills', 'portfolio', 'contact'];
-      const currentSection = sections.find((section) => {
-        const element = document.getElementById(section);
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          return rect.top <= 100 && rect.bottom > 100;
-        }
-        return false;
-      }) || 'home';
-
-      setActiveSection(currentSection);
+      const now = Date.now();
+      if (now - lastCall < debounce) return;
+      lastCall = now;
+      if (!tickingRef.current) {
+        tickingRef.current = true;
+        window.requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 30);
+          let foundSection = 'home';
+          for (let i = 0; i < sectionIds.length; i++) {
+            const el = sectionRefs.current[sectionIds[i]];
+            if (el) {
+              const rect = el.getBoundingClientRect();
+              if (rect.top <= 100 && rect.bottom > 100) {
+                foundSection = sectionIds[i];
+                break;
+              }
+            }
+          }
+          setActiveSection(prev => (prev !== foundSection ? foundSection : prev));
+          tickingRef.current = false;
+        });
+      }
     };
-
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [sectionIds]);
 
-  // Smooth scroll to section
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
+  // Smooth scroll to section - Optimized
+  const scrollToSection = useCallback((sectionId: string) => {
+    const element = sectionRefs.current[sectionId] || document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const offset = 72; // Slightly smaller for new header
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
       setActiveSection(sectionId);
       setIsMenuOpen(false);
     }
-  };
+  }, []);
 
   // Toggle mobile menu
-  const toggleMenu = () => {
+  const toggleMenu = useCallback(() => {
     setIsMenuOpen((prev) => !prev);
+  }, []);
+
+  // Close menu on ESC key (accessibility)
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsMenuOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isMenuOpen]);
+
+  // Memoize nav items for better performance
+  const memoizedNavItems = useMemo(() => navItems, []);
+
+  // Animation variants
+  const headerVariants = {
+    initial: { y: -64, opacity: 0 },
+    animate: { y: 0, opacity: 1, transition: { duration: 0.5, ease: 'easeOut' } },
+    scrolled: {
+      boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.12)',
+      background: isDark
+        ? 'rgba(16, 24, 39, 0.75)'
+        : 'rgba(255, 255, 255, 0.75)',
+      transition: { duration: 0.3 },
+    },
   };
 
   return (
     <motion.header
-      initial={{ y: -60, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300
-        bg-white/90 dark:bg-gray-900/70
-        border-b border-blue-100 dark:border-blue-500/10
-        shadow-[0_2px_16px_0_rgba(30,64,175,0.04)]
-        backdrop-blur-xl
-        py-3 md:py-4
-      `}
+      variants={headerVariants}
+      initial="initial"
+      animate="animate"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${glassBg} ${scrolled ? 'shadow-2xl' : 'shadow-lg'} px-2 md:px-0`}
       style={{
-        transition: 'background-color 0.3s, border 0.3s, box-shadow 0.3s',
+        borderRadius: '0 0 1.5rem 1.5rem',
+        borderBottom: isDark ? '1.5px solid #33415544' : '1.5px solid #e0e7ef44',
+        transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
       }}
       role="banner"
       aria-label="Main navigation"
     >
-      <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
-          {/* Logo */}
-          <a
-            href="#home"
+      {/* Animated gradient overlay for glass effect */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none rounded-b-3xl"
+        style={{
+          background:
+            'linear-gradient(120deg,rgba(99,102,241,0.08) 0%,rgba(139,92,246,0.08) 100%)',
+          zIndex: 0,
+        }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.7, ease: 'easeOut' }}
+      />
+      <div className="container mx-auto px-2 md:px-6 flex items-center justify-between relative z-10 min-h-[64px]">
+        {/* Logo and Name */}
+        <a
+          href="#home"
           onClick={e => {
-              e.preventDefault();
-              scrollToSection('home');
-            }}
-          className="text-2xl font-bold relative group flex items-center gap-2"
-            onMouseEnter={() => setCursorVariant('text')}
-            onMouseLeave={() => setCursorVariant('default')}
-            aria-label="Hemanth Kumar - Home"
+            e.preventDefault();
+            scrollToSection('home');
+          }}
+          className="text-2xl font-bold relative group flex items-center gap-2 gpu-accelerated select-none"
+          onMouseEnter={() => setCursorVariant('text')}
+          onMouseLeave={() => setCursorVariant('default')}
+          aria-label="HEMANTH K - Home"
+        >
+          <div className="relative gpu-accelerated">
+            <Logo size={32} isDark={isDark} showPulse={true} />
+            <div className="absolute inset-0 bg-blue-500/30 dark:bg-blue-400/30 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </div>
+          <motion.span
+            className="inline-block bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 transition-all duration-300 group-hover:scale-110 group-hover:translate-y-[-2px] gpu-accelerated text-[1.45rem] sm:text-2xl font-extrabold tracking-tight"
+            initial={{ opacity: 0, x: -16 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, type: 'spring' }}
           >
-            <div className="relative">
-              <Logo size={32} isDark={isDark} showPulse={true} />
-              <div className="absolute inset-0 bg-blue-500/30 dark:bg-blue-400/30 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </div>
-                             <span className="inline-block bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 transition-all duration-300 group-hover:scale-110 group-hover:translate-y-[-2px]">
-                HEMANTH<span className="text-blue-600 dark:text-blue-400">K</span>
-              </span>
-          </a>
+            HEMANTH KUMAR
+          </motion.span>
+        </a>
 
-          {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-2 relative">
-          {navItems.map((item, idx) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 + idx * 0.07, duration: 0.4, ease: 'easeOut' }}
-              className="relative px-2"
-            >
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-2 relative" aria-label="Primary">
+          {memoizedNavItems.map((item, idx) => (
+            <div key={item.id} className="relative px-2">
               <a
                 href={item.isExternal ? undefined : `#${item.id}`}
                 onClick={e => {
@@ -136,16 +202,17 @@ const Header: React.FC<HeaderProps> = ({ openResumeModal }) => {
                 }}
                 target={item.isExternal && item.id !== 'resume' ? '_blank' : undefined}
                 rel={item.isExternal && item.id !== 'resume' ? 'noopener noreferrer' : undefined}
-                                 className={`px-2 py-2 text-base font-medium flex items-center relative transition-all duration-300 focus:outline-none
-                   ${activeSection === item.id
-                     ? 'text-blue-700 dark:text-blue-400'
-                     : 'text-gray-800 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'}
-                 `}
+                className={`px-2 py-2 text-base font-medium flex items-center relative transition-all duration-300 focus:outline-none gpu-accelerated
+                  ${activeSection === item.id
+                    ? 'text-blue-700 dark:text-blue-400'
+                    : 'text-gray-800 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'}
+                `}
                 onMouseEnter={() => setCursorVariant('button')}
                 onMouseLeave={() => setCursorVariant('default')}
                 aria-label={item.isExternal ? `Open ${item.label}` : `Navigate to ${item.label} section`}
+                tabIndex={0}
               >
-                                 <span className="relative z-10 transition-all duration-300 group-hover:-translate-y-1 group-hover:scale-105 flex items-center">
+                <span className="relative z-10 transition-all duration-300 group-hover:-translate-y-1 group-hover:scale-105 flex items-center gpu-accelerated">
                   {item.label}
                   {item.isExternal && <ExternalLink className="ml-1" size={12} />}
                 </span>
@@ -159,7 +226,7 @@ const Header: React.FC<HeaderProps> = ({ openResumeModal }) => {
                   />
                 )}
               </a>
-            </motion.div>
+            </div>
           ))}
         </nav>
 
@@ -176,16 +243,27 @@ const Header: React.FC<HeaderProps> = ({ openResumeModal }) => {
         </div>
 
         {/* Mobile Hamburger */}
-                 <button
-           className="md:hidden flex flex-col justify-center items-center w-10 h-10 focus:outline-none bg-transparent ml-2 transition-all duration-300 hover:scale-110"
-          aria-label="Open menu"
+        <button
+          className="md:hidden flex flex-col justify-center items-center w-10 h-10 focus:outline-none bg-transparent ml-2 transition-all duration-300 hover:scale-110"
+          aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={isMenuOpen}
+          aria-controls="mobile-menu"
           onClick={toggleMenu}
           onMouseEnter={() => setCursorVariant('button')}
           onMouseLeave={() => setCursorVariant('default')}
         >
-                     <span className={`block w-6 h-0.5 bg-blue-600 dark:bg-blue-400 mb-1 transition-all duration-500 ease-out ${isMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
-           <span className={`block w-6 h-0.5 bg-blue-600 dark:bg-blue-400 mb-1 transition-all duration-500 ease-out ${isMenuOpen ? 'opacity-0 scale-0' : ''}`}></span>
-           <span className={`block w-6 h-0.5 bg-blue-600 dark:bg-blue-400 transition-all duration-500 ease-out ${isMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
+          <motion.span
+            className={`block w-6 h-0.5 bg-blue-600 dark:bg-blue-400 mb-1 rounded transition-all duration-500 ease-out ${isMenuOpen ? 'rotate-45 translate-y-2' : ''}`}
+            layout
+          ></motion.span>
+          <motion.span
+            className={`block w-6 h-0.5 bg-blue-600 dark:bg-blue-400 mb-1 rounded transition-all duration-500 ease-out ${isMenuOpen ? 'opacity-0 scale-0' : ''}`}
+            layout
+          ></motion.span>
+          <motion.span
+            className={`block w-6 h-0.5 bg-blue-600 dark:bg-blue-400 rounded transition-all duration-500 ease-out ${isMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}
+            layout
+          ></motion.span>
         </button>
       </div>
 
@@ -193,20 +271,22 @@ const Header: React.FC<HeaderProps> = ({ openResumeModal }) => {
       <AnimatePresence>
         {isMenuOpen && (
           <motion.nav
-            initial={{ opacity: 0, y: -20 }}
+            id="mobile-menu"
+            initial={{ opacity: 0, y: -24 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
-                         className="md:hidden absolute top-full left-0 w-full bg-white/95 dark:bg-gray-900/95 border-b border-blue-500/10 z-40 backdrop-blur-xl"
+            exit={{ opacity: 0, y: -24 }}
+            transition={{ duration: 0.32, ease: 'easeOut' }}
+            className="md:hidden absolute top-full left-0 w-full glass z-40 shadow-2xl rounded-b-2xl"
+            aria-label="Mobile navigation"
+            role="navigation"
+            style={{
+              borderBottomLeftRadius: '1.25rem',
+              borderBottomRightRadius: '1.25rem',
+            }}
           >
-            <ul className="flex flex-col gap-2 py-4 px-6">
-              {navItems.map((item, idx) => (
-                <motion.li
-                  key={item.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 + idx * 0.07, duration: 0.3, ease: 'easeOut' }}
-                >
+            <ul className="flex flex-col gap-2 py-4 px-6 animate-fadein-up">
+              {memoizedNavItems.map((item) => (
+                <li key={item.id}>
                   <a
                     href={item.isExternal ? undefined : `#${item.id}`}
                     onClick={e => {
@@ -222,29 +302,30 @@ const Header: React.FC<HeaderProps> = ({ openResumeModal }) => {
                     }}
                     target={item.isExternal && item.id !== 'resume' ? '_blank' : undefined}
                     rel={item.isExternal && item.id !== 'resume' ? 'noopener noreferrer' : undefined}
-                                         className={`block w-full px-4 py-3 text-lg font-medium transition-all duration-300 focus:outline-none ${
-                       activeSection === item.id
-                         ? 'text-blue-700 dark:text-blue-300'
-                         : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300'
-                     }`}
+                    className={`block w-full px-4 py-3 text-lg font-medium transition-all duration-300 focus:outline-none rounded-xl ${
+                      activeSection === item.id
+                        ? 'text-blue-700 dark:text-blue-300 bg-blue-50/60 dark:bg-blue-900/30'
+                        : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50/40 dark:hover:bg-blue-900/20'
+                    }`}
                     onMouseEnter={() => setCursorVariant('button')}
                     onMouseLeave={() => setCursorVariant('default')}
                     aria-label={item.isExternal ? `Open ${item.label}` : `Navigate to ${item.label} section`}
+                    tabIndex={0}
                   >
                     {item.label}
                     {item.isExternal && <ExternalLink className="ml-2 inline" size={16} />}
                   </a>
-                </motion.li>
+                </li>
               ))}
               <li className="mt-2 flex justify-center">
-              <ThemeSwitcher />
+                <ThemeSwitcher />
               </li>
             </ul>
           </motion.nav>
-                )}
+        )}
       </AnimatePresence>
     </motion.header>
   );
-};
+});
 
 export default Header;

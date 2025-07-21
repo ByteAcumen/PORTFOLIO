@@ -1,6 +1,4 @@
 import React, { useEffect } from 'react';
-import { motion, useAnimation } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
 import { 
   Github, 
   Linkedin, 
@@ -21,17 +19,7 @@ import ParticleBackground from './ParticleBackground'; // Added import for Parti
 
 const Footer: React.FC = React.memo(() => {
   const { setCursorVariant } = useCursor();
-  const controls = useAnimation();
-  const [ref, inView] = useInView({
-    threshold: 0.1,
-    triggerOnce: true
-  });
-
-  useEffect(() => {
-    if (inView) {
-      controls.start('visible');
-    }
-  }, [controls, inView]);
+  // No animation effect needed
 
   const socialLinks = [
     { icon: Github, href: 'https://github.com/H0E0M0A0N0T0', label: 'GitHub', color: 'from-gray-500 to-gray-600' },
@@ -67,7 +55,7 @@ const Footer: React.FC = React.memo(() => {
   ];
 
   return (
-    <footer id="footer" ref={ref} className="w-full min-h-[420px] relative overflow-hidden pt-16 pb-6 transition-colors duration-300 text-gray-800 dark:text-white">
+    <footer id="footer" className="w-full min-h-[420px] relative overflow-hidden pt-16 pb-6 transition-colors duration-300 text-gray-800 dark:text-white animate-fadein">
       {/* Hero-style Background */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         {/* Light Theme */}
@@ -88,121 +76,91 @@ const Footer: React.FC = React.memo(() => {
         <ParticleBackground className="opacity-20 dark:opacity-30" />
         <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-white/5 dark:to-black/5" />
       </div>
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-6 lg:gap-8 items-start md:items-center mb-10 md:mb-14">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-8 glass rounded-2xl shadow-xl animate-fadein-up">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-6 lg:gap-8 items-start md:items-center mb-10 md:mb-14 animate-fadein-up">
           {/* Brand & Summary */}
-          <motion.div 
-            variants={{ hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0, transition: { duration: 0.7, delay: 0.05, type: 'spring' } } }}
-            initial="hidden"
-            animate={controls}
-            viewport={{ once: true, amount: 0.2 }}
-            className="md:col-span-4 text-center md:text-left flex flex-col items-center md:items-start"
-            whileHover={{ scale: 1.01, boxShadow: '0 4px 32px 0 rgba(59,130,246,0.10)' }}
-          >
+          <div className="md:col-span-4 text-center md:text-left flex flex-col items-center md:items-start animate-fadein-up">
             <div className="text-3xl font-bold mb-4 flex items-center justify-center md:justify-start">
               <Zap className="mr-2 text-blue-600 dark:text-blue-400 animate-spin-slow" size={28} />
-              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">H H Hemanth Kumar</span>
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">H H HEMANTH KUMAR</span>
             </div>
             <p className="text-gray-400 dark:text-gray-400 leading-relaxed max-w-md mb-6">
               Final-year Computer Science student specializing in AI/ML, full-stack development, and quantum computing. Proven ability to architect and deliver high-impact solutions, from AI-powered fintech systems to quantum-enhanced climate models for competitions like the NASA Space Apps Challenge.
             </p>
             <div className="flex space-x-5 mt-2 mb-2">
               {[{icon: Github, href: 'https://github.com/ByteAcumen'}, {icon: Linkedin, href: 'https://linkedin.com/in/h-h-hemanth-kumar'}, {icon: Mail, href: 'mailto:hemanth.kumar04hh@gmail.com'}].map((item, i) => (
-                <motion.a
+                <a
                   key={i}
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  whileHover={{ scale: 1.18, boxShadow: '0 0 16px 0 #3b82f6' }}
-                  whileTap={{ scale: 0.95 }}
-                  className="transition-transform duration-200"
+                  className="transition-transform duration-200 hover:scale-110 hover:shadow-lg"
                 >
                   <item.icon size={26} className="text-gray-400 hover:text-blue-500 transition-colors" />
-                </motion.a>
+                </a>
               ))}
             </div>
-          </motion.div>
+          </div>
           {/* Navigation */}
-          <motion.div 
-            variants={{ hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0, transition: { duration: 0.7, delay: 0.15, type: 'spring' } } }}
-            initial="hidden"
-            animate={controls}
-            viewport={{ once: true, amount: 0.2 }}
-            className="md:col-span-2 lg:col-span-2"
-            whileHover={{ scale: 1.03 }}
-          >
+          <div className="md:col-span-2 lg:col-span-2 animate-fadein-up">
             <h3 className="text-lg font-semibold mb-6 text-blue-500 dark:text-blue-400 relative">
               Navigation
               <span className="block w-10 h-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 mt-1" />
             </h3>
             <ul className="space-y-3">
-              <li><motion.button whileHover={{ scale: 1.08, color: '#2563eb' }} onClick={() => scrollToTop()} className="text-gray-400 hover:text-blue-500 transition-colors flex items-center"><span className="w-1.5 h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full mr-2"></span>Home</motion.button></li>
+              <li><a onClick={() => scrollToTop()} className="text-gray-400 hover:text-blue-500 transition-colors flex items-center"><span className="w-1.5 h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full mr-2"></span>Home</a></li>
               {navigationLinks.map((item) => (
-                <li key={item.name}><motion.button whileHover={{ scale: 1.08, color: '#2563eb' }} onClick={() => scrollToSection(item.link)} className="text-gray-400 hover:text-blue-500 transition-colors flex items-center"><span className="w-1.5 h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full mr-2"></span>{item.name}</motion.button></li>
+                <li key={item.name}><a onClick={() => scrollToSection(item.link)} className="text-gray-400 hover:text-blue-500 transition-colors flex items-center"><span className="w-1.5 h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full mr-2"></span>{item.name}</a></li>
               ))}
-              <li><motion.a whileHover={{ scale: 1.08, color: '#2563eb' }} href="public/Resume.pdf" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-500 transition-colors flex items-center"><span className="w-1.5 h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full mr-2"></span>Resume</motion.a></li>
+              <li><a href="public/Resume.pdf" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-500 transition-colors flex items-center"><span className="w-1.5 h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full mr-2"></span>Resume</a></li>
             </ul>
-          </motion.div>
+          </div>
           {/* Services */}
-          <motion.div 
-            variants={{ hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0, transition: { duration: 0.7, delay: 0.25, type: 'spring' } } }}
-            initial="hidden"
-            animate={controls}
-            viewport={{ once: true, amount: 0.2 }}
-            className="md:col-span-3 lg:col-span-3"
-            whileHover={{ scale: 1.02 }}
-          >
+          <div className="md:col-span-3 lg:col-span-3 animate-fadein-up">
             <h3 className="text-lg font-semibold mb-6 text-blue-500 dark:text-blue-400 relative">
               Services
               <span className="block w-10 h-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 mt-1" />
             </h3>
             <ul className="space-y-3">
               {services.map((service, idx) => (
-                <motion.li key={service} whileHover={{ scale: 1.07, color: '#2563eb' }} className="text-gray-400 flex items-center group transition-transform duration-200"><span className="w-6 h-6 flex items-center justify-center bg-blue-600/10 dark:bg-blue-600/20 rounded-full mr-2"><Code size={14} className="text-blue-600 dark:text-blue-400" /></span>{service}</motion.li>
+                <li key={service} className="text-gray-400 flex items-center group transition-transform duration-200"><span className="w-6 h-6 flex items-center justify-center bg-blue-600/10 dark:bg-blue-600/20 rounded-full mr-2"><Code size={14} className="text-blue-600 dark:text-blue-400" /></span>{service}</li>
               ))}
             </ul>
-          </motion.div>
+          </div>
           {/* Contact Info */}
-          <motion.div 
-            variants={{ hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0, transition: { duration: 0.7, delay: 0.35, type: 'spring' } } }}
-            initial="hidden"
-            animate={controls}
-            viewport={{ once: true, amount: 0.2 }}
-            className="md:col-span-3 text-center md:text-left"
-            whileHover={{ scale: 1.02 }}
-          >
+          <div className="md:col-span-3 text-center md:text-left animate-fadein-up">
             <h3 className="text-lg font-semibold mb-6 text-blue-500 dark:text-blue-400 relative">
               Get In Touch
               <span className="block w-10 h-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 mt-1" />
             </h3>
             <div className="space-y-3">
               {[{icon: MapPin, value: 'Yelahanka, Bangalore'}, {icon: Mail, value: 'hemanth.kumar04hh@gmail.com'}, {icon: Phone, value: '+91 8488834807'}, {icon: Linkedin, value: 'linkedin.com/in/h-h-hemanth-kumar', href: 'https://linkedin.com/in/h-h-hemanth-kumar'}, {icon: Github, value: 'github.com/ByteAcumen', href: 'https://github.com/ByteAcumen'}].map((item, i) => (
-                <motion.div key={i} whileHover={{ scale: 1.07, color: '#2563eb' }} className="flex items-center justify-center md:justify-start group transition-transform duration-200">
+                <div key={i} className="flex items-center justify-center md:justify-start group transition-transform duration-200">
                   <span className="w-8 h-8 flex items-center justify-center bg-blue-600/10 dark:bg-blue-600/20 rounded-full mr-3"><item.icon size={16} className="text-blue-600 dark:text-blue-400" /></span>
                   {item.href ? (
                     <a href={item.href} target="_blank" rel="noopener noreferrer" className="text-gray-400 group-hover:text-blue-500 transition-colors duration-300 underline">{item.value}</a>
                   ) : (
                     <span className="text-gray-400 group-hover:text-blue-500 transition-colors duration-300">{item.value}</span>
                   )}
-                </motion.div>
+                </div>
               ))}
             </div>
-          </motion.div>
+          </div>
         </div>
         {/* Divider */}
         <div className="w-full h-px bg-gradient-to-r from-transparent via-blue-900/30 to-transparent mb-6" />
         {/* Copyright & Back to Top */}
-        <motion.div variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, delay: 0.45 } } }} initial="hidden" animate={controls} viewport={{ once: true, amount: 0.2 }} className="flex flex-col md:flex-row justify-between items-center pt-4">
+        <div className="flex flex-col md:flex-row justify-between items-center pt-4 animate-fadein-up">
           <div className="text-gray-500 dark:text-gray-400 text-sm mb-4 md:mb-0">
             <span className="flex items-center">© {new Date().getFullYear()} H H Hemanth Kumar. All rights reserved.</span>
           </div>
-          <motion.button whileHover={{ scale: 1.15, y: -2 }} whileTap={{ scale: 0.95 }} onClick={scrollToTop} className="relative group focus:outline-none">
+          <a onClick={scrollToTop} className="relative group focus:outline-none">
             <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-blue-600/40 to-indigo-600/40 blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
             <div className="relative p-2 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-600 dark:text-gray-300 group-hover:text-blue-600 transition-colors shadow-md">
               <ArrowUp size={20} />
             </div>
-          </motion.button>
-        </motion.div>
+          </a>
+        </div>
       </div>
     </footer>
   );

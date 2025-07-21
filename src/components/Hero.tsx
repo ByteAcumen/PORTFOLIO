@@ -1,84 +1,95 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowDown, Download, Mail, Github, Linkedin } from 'lucide-react';
+import { Download, Mail, Github, Linkedin } from 'lucide-react';
 import { useCursor } from '../contexts/useCursor';
 import TypewriterEffect from './TypewriterEffect';
 import ProgressiveImage from './ProgressiveImage';
 import ParticleBackground from './ParticleBackground';
-import ThemeSwitcher from './ThemeSwitcher';
 
 interface HeroProps {
   openResumeModal: () => void;
 }
 
-// Hero component
-const Hero: React.FC<HeroProps> = ({ openResumeModal }) => {
-  const { setCursorVariant } = useCursor();
-  const [isVisible, setIsVisible] = useState(false);
+// Use the unified glass class for consistent glassmorphism
+const glassBg = 'glass';
 
-  useEffect(() => {
-    setIsVisible(true);
+const sectionRefs = {} as { [key: string]: HTMLElement | null };
+['contact'].forEach(id => {
+  sectionRefs[id] = typeof window !== 'undefined' ? document.getElementById(id) : null;
+});
+
+const Hero: React.FC<HeroProps> = React.memo(({ openResumeModal }) => {
+  const { setCursorVariant } = useCursor();
+
+  const scrollToSection = useCallback((sectionId: string) => {
+    const element = sectionRefs[sectionId] || document.getElementById(sectionId);
+    if (element) {
+      const offset = 72;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
+    }
   }, []);
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   return (
-    <section id="home" className="min-h-screen flex items-end justify-center relative overflow-hidden pt-16 pb-8 bg-white dark:bg-[#0a1128] transition-colors duration-500">
+    <section
+      id="home"
+      className={`min-h-screen flex items-end justify-center relative overflow-hidden pt-16 pb-8 transition-colors duration-500 gpu-accelerated ${glassBg}`}
+      style={{
+        borderRadius: '0 0 2.5rem 2.5rem',
+        borderBottom: '1.5px solid #e0e7ef44',
+      }}
+    >
+      {/* Animated gradient overlay for glass effect */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none rounded-b-3xl"
+        style={{
+          background:
+            'linear-gradient(120deg,rgba(99,102,241,0.08) 0%,rgba(139,92,246,0.08) 100%)',
+          zIndex: 0,
+        }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.7, ease: 'easeOut' }}
+      />
       {/* 3D Professional Background */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 gpu-accelerated">
         {/* Light Theme Background */}
         <div className="absolute inset-0 block dark:hidden">
-          {/* Subtle gradient base */}
           <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-blue-50/40" />
-          {/* 3D Geometric Elements */}
-          <div className="absolute top-20 right-20 w-56 h-56 bg-gradient-to-br from-blue-100/30 to-indigo-100/20 rounded-full blur-2xl animate-pulse" style={{ animationDuration: '8s' }} />
-          <div className="absolute bottom-32 left-16 w-40 h-40 bg-gradient-to-tr from-indigo-100/20 to-purple-100/10 rounded-full blur-2xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
-          {/* 3D Grid Pattern */}
+          <div className="absolute top-20 right-20 w-56 h-56 bg-gradient-to-br from-blue-100/30 to-indigo-100/20 rounded-full blur-2xl animate-pulse-slow opacity-60" />
+          <div className="absolute bottom-32 left-16 w-40 h-40 bg-gradient-to-tr from-indigo-100/20 to-purple-100/10 rounded-full blur-2xl animate-pulse-slow opacity-60" style={{ animationDelay: '2s' }} />
+          <div className="absolute inset-0 opacity-[0.008]">
+            <div className="absolute inset-0" style={{
+              backgroundImage: `linear-gradient(rgba(59, 130, 246, 0.05) 1px, transparent 1px),linear-gradient(90deg, rgba(59, 130, 246, 0.05) 1px, transparent 1px)`,
+              backgroundSize: '50px 50px'
+            }} />
+          </div>
+          <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-400/08 rounded-full animate-float" />
+          <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-indigo-400/08 rounded-full animate-float" style={{ animationDelay: '1s' }} />
+        </div>
+        {/* Dark Theme Background */}
+        <div className="absolute inset-0 hidden dark:block">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0a1128] via-[#101630] to-[#14213d]" />
+          <div className="absolute top-20 right-20 w-56 h-56 bg-gradient-to-br from-blue-600/08 to-indigo-600/06 rounded-full blur-2xl animate-pulse-slow opacity-70" />
+          <div className="absolute bottom-32 left-16 w-40 h-40 bg-gradient-to-tr from-indigo-600/06 to-purple-600/04 rounded-full blur-2xl animate-pulse-slow opacity-70" style={{ animationDelay: '2s' }} />
           <div className="absolute inset-0 opacity-[0.01]">
             <div className="absolute inset-0" style={{
               backgroundImage: `linear-gradient(rgba(59, 130, 246, 0.07) 1px, transparent 1px),linear-gradient(90deg, rgba(59, 130, 246, 0.07) 1px, transparent 1px)`,
               backgroundSize: '50px 50px'
             }} />
           </div>
-          {/* Floating 3D Shapes */}
-          <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-400/10 rounded-full animate-float" style={{ animationDuration: '6s' }} />
-          <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-indigo-400/10 rounded-full animate-float" style={{ animationDuration: '8s', animationDelay: '1s' }} />
-          <div className="absolute bottom-1/4 right-1/4 w-1.5 h-1.5 bg-purple-400/10 rounded-full animate-float" style={{ animationDuration: '7s', animationDelay: '3s' }} />
+          <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-400/08 rounded-full animate-float" />
+          <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-indigo-400/08 rounded-full animate-float" style={{ animationDelay: '1s' }} />
         </div>
-        {/* Dark Theme Background */}
-        <div className="absolute inset-0 hidden dark:block">
-          {/* Deep gradient base */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#0a1128] via-[#101630] to-[#14213d]" />
-          {/* 3D Geometric Elements */}
-          <div className="absolute top-20 right-20 w-56 h-56 bg-gradient-to-br from-blue-600/10 to-indigo-600/8 rounded-full blur-2xl animate-pulse" style={{ animationDuration: '8s' }} />
-          <div className="absolute bottom-32 left-16 w-40 h-40 bg-gradient-to-tr from-indigo-600/8 to-purple-600/6 rounded-full blur-2xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
-          {/* 3D Grid Pattern */}
-          <div className="absolute inset-0 opacity-[0.015]">
-            <div className="absolute inset-0" style={{
-              backgroundImage: `linear-gradient(rgba(59, 130, 246, 0.09) 1px, transparent 1px),linear-gradient(90deg, rgba(59, 130, 246, 0.09) 1px, transparent 1px)`,
-              backgroundSize: '50px 50px'
-            }} />
-          </div>
-          {/* Floating 3D Shapes */}
-          <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-400/10 rounded-full animate-float" style={{ animationDuration: '6s' }} />
-          <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-indigo-400/10 rounded-full animate-float" style={{ animationDuration: '8s', animationDelay: '1s' }} />
-          <div className="absolute bottom-1/4 right-1/4 w-1.5 h-1.5 bg-purple-400/10 rounded-full animate-float" style={{ animationDuration: '7s', animationDelay: '3s' }} />
-        </div>
-        {/* Subtle Particle Effect */}
-        <ParticleBackground className="opacity-10 dark:opacity-20" />
-        {/* 3D Depth Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-white/10 dark:to-black/10" />
+        <ParticleBackground className="opacity-8 dark:opacity-15" />
+        <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-white/5 dark:to-black/5" />
       </div>
-      <motion.div
-        className="w-full max-w-7xl mx-auto px-4 md:px-8 relative z-10 py-10 md:py-20"
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: 'easeOut' }}
+      <div
+        className="w-full max-w-7xl mx-auto px-4 md:px-8 relative z-10 py-10 md:py-20 animate-fadein"
       >
         <div className="grid lg:grid-cols-12 gap-8 lg:gap-16 items-center">
           {/* Profile Image (mobile: top, desktop: right) */}
@@ -89,13 +100,11 @@ const Hero: React.FC<HeroProps> = ({ openResumeModal }) => {
             className="block lg:hidden mb-8 w-full flex justify-center"
           >
             <div className="relative w-40 h-40 sm:w-56 sm:h-56 flex items-center justify-center">
-              {/* Glowing gradient border */}
               <motion.div
                 className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-indigo-400 opacity-60 blur-lg"
                 animate={{ scale: [1, 1.08, 1] }}
                 transition={{ duration: 4, repeat: Infinity, repeatType: 'loop', ease: 'easeInOut' }}
               />
-              {/* Image container with border */}
               <motion.div
                 className="relative w-36 h-36 sm:w-52 sm:h-52 rounded-full overflow-hidden border-4 border-white dark:border-gray-800 shadow-xl"
                 initial={{ scale: 0.92, opacity: 0 }}
@@ -109,18 +118,14 @@ const Hero: React.FC<HeroProps> = ({ openResumeModal }) => {
                   className="object-cover w-full h-full"
                 />
               </motion.div>
-              {/* Floating elements for depth */}
               <div className="absolute top-[12%] right-[8%] w-8 h-8 bg-blue-400/10 backdrop-blur-sm rounded-md animate-float" style={{ animationDuration: '4s' }} />
               <div className="absolute bottom-[18%] left-[12%] w-6 h-6 bg-indigo-400/10 backdrop-blur-sm rounded-full animate-float" style={{ animationDuration: '3.5s', animationDelay: '0.7s' }} />
             </div>
           </motion.div>
 
-          {/* Main Content (no card) */}
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: isVisible ? 1 : 0, x: isVisible ? 0 : -50 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="lg:col-span-7 flex flex-col items-center lg:items-start"
+          {/* Main Content */}
+          <div
+            className="lg:col-span-7 flex flex-col items-center lg:items-start animate-fadein-left"
           >
             {/* Badges */}
             <div className="flex flex-wrap gap-3 justify-center lg:justify-start mb-8">
@@ -228,28 +233,23 @@ const Hero: React.FC<HeroProps> = ({ openResumeModal }) => {
                 <Mail size={22} />
               </motion.a>
             </div>
-          </motion.div>
+          </div>
 
           {/* Profile Image (desktop only) */}
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: isVisible ? 1 : 0, x: isVisible ? 0 : 50 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="hidden lg:flex mt-12 lg:mt-0 lg:col-span-5 justify-center"
+          <div
+            className="hidden lg:flex mt-12 lg:mt-0 lg:col-span-5 justify-center animate-fadein-right"
           >
             <div className="relative w-64 h-64 sm:w-80 sm:h-80 flex items-center justify-center">
-              {/* Glowing gradient border */}
               <motion.div
                 className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-indigo-400 opacity-60 blur-lg"
                 animate={{ scale: [1, 1.08, 1] }}
                 transition={{ duration: 4, repeat: Infinity, repeatType: 'loop', ease: 'easeInOut' }}
               />
-              {/* Image container with border */}
               <motion.div
                 className="relative w-56 h-56 sm:w-72 sm:h-72 rounded-full overflow-hidden border-4 border-white dark:border-gray-800 shadow-xl"
                 initial={{ scale: 0.92, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.8, duration: 0.6, type: 'spring' }}
+                transition={{ delay: 1, duration: 0.7, type: 'spring' }}
                 whileHover={{ scale: 1.03 }}
               >
                 <ProgressiveImage
@@ -258,15 +258,14 @@ const Hero: React.FC<HeroProps> = ({ openResumeModal }) => {
                   className="object-cover w-full h-full"
                 />
               </motion.div>
-              {/* Floating elements for depth */}
-              <div className="absolute top-[12%] right-[8%] w-12 h-12 bg-blue-400/10 backdrop-blur-sm rounded-md animate-float" style={{ animationDuration: '4s' }} />
-              <div className="absolute bottom-[18%] left-[12%] w-9 h-9 bg-indigo-400/10 backdrop-blur-sm rounded-full animate-float" style={{ animationDuration: '3.5s', animationDelay: '0.7s' }} />
+              <div className="absolute top-[10%] right-[10%] w-10 h-10 bg-blue-400/10 backdrop-blur-sm rounded-md animate-float" style={{ animationDuration: '4.5s' }} />
+              <div className="absolute bottom-[15%] left-[10%] w-8 h-8 bg-indigo-400/10 backdrop-blur-sm rounded-full animate-float" style={{ animationDuration: '3.8s', animationDelay: '0.7s' }} />
             </div>
-          </motion.div>
+          </div>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
-};
+});
 
 export default Hero;

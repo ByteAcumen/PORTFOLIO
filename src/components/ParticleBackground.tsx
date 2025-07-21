@@ -33,7 +33,7 @@ const ParticleField: React.FC = () => {
         size={isDark ? 0.018 : 0.012}
         sizeAttenuation={true}
         depthWrite={false}
-        opacity={isDark ? 0.35 : 0.22}
+        opacity={isDark ? 0.22 : 0.13}
       />
     </Points>
   );
@@ -45,7 +45,7 @@ interface ParticleBackgroundProps {
 
 const ParticleBackground: React.FC<ParticleBackgroundProps> = ({ className }) => {
   return (
-    <div className={`fixed inset-0 z-0 ${className || ''}`}>
+    <div className={`fixed inset-0 z-0 pointer-events-none ${className || ''}`} style={{ filter: 'blur(1.5px)', opacity: 0.85 }}>
       <Canvas camera={{ position: [0, 0, 1] }}>
         <ParticleField />
       </Canvas>

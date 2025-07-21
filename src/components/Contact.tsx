@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useAnimation } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
 import { Mail, Phone, MapPin, Send, Linkedin, Github, Calendar } from 'lucide-react';
 import { useCursor } from '../contexts/useCursor';
 import ParticleBackground from './ParticleBackground';
@@ -11,16 +9,12 @@ const WEB3FORMS_ACCESS_KEY = 'f5e7c2f4-0df5-4eed-a715-6c88965dda43';
 
 const Contact: React.FC = React.memo(() => {
   const { setCursorVariant } = useCursor();
-  const controls = useAnimation();
-  const [ref, inView] = useInView({ threshold: 0.1, triggerOnce: true });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [result, setResult] = useState('');
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
   const formRef = useRef<HTMLFormElement>(null);
-
-  useEffect(() => { if (inView) controls.start('visible'); }, [controls, inView]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -104,7 +98,7 @@ const Contact: React.FC = React.memo(() => {
   ];
 
   return (
-    <section id="contact" ref={ref} className="py-28 min-h-[520px] relative overflow-hidden transition-colors duration-300">
+    <section id="contact" className="py-28 min-h-[520px] relative overflow-hidden transition-colors duration-300 animate-fadein">
       {/* Hero-style Background */}
       <div className="absolute inset-0 z-0 pointer-events-none will-change-transform will-change-opacity">
         {/* Light Theme */}
@@ -125,55 +119,35 @@ const Contact: React.FC = React.memo(() => {
         <ParticleBackground className="opacity-20 dark:opacity-30" />
         <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-white/5 dark:to-black/5" />
       </div>
-      <div className="container mx-auto px-6 max-w-7xl relative z-10 will-change-transform will-change-opacity">
-        <motion.div
-          variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, delay: 0.1, type: 'spring' } } }}
-          className="text-center mb-16 relative"
-        >
+      <div className="container mx-auto px-6 max-w-7xl relative z-10 will-change-transform will-change-opacity animate-fadein">
+        <div className="text-center mb-16 relative animate-fadein">
           <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 w-20 h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent rounded-full opacity-70"></div>
-          <motion.span 
-            className="inline-block px-5 py-2 bg-gradient-to-r from-blue-100/80 to-indigo-100/80 dark:from-blue-900/30 dark:to-indigo-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium mb-5 border border-blue-100 dark:border-blue-700/30 shadow-sm"
-            initial={{ opacity: 0, y: -10, scale: 0.9 }}
-            animate={controls}
-            variants={{
-              visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, delay: 0.15, type: 'spring' } }
-            }}
+          <span 
+            className="inline-block px-5 py-2 bg-gradient-to-r from-blue-100/80 to-indigo-100/80 dark:from-blue-900/30 dark:to-indigo-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium mb-5 border border-blue-100 dark:border-blue-700/30 shadow-sm animate-fadein-up"
           >
             Get In Touch
-          </motion.span>
-          <motion.h2 
-            className="text-4xl sm:text-5xl font-bold mb-6 font-heading"
+          </span>
+          <h2 
+            className="text-4xl sm:text-5xl font-bold mb-6 font-heading animate-fadein-up"
             onMouseEnter={() => setCursorVariant('text')}
             onMouseLeave={() => setCursorVariant('default')}
-            initial={{ opacity: 0, y: 10 }}
-            animate={controls}
-            variants={{
-              visible: { opacity: 1, y: 0, transition: { duration: 0.5, delay: 0.22, type: 'spring' } }
-            }}
           >
             Let's <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent relative">
               Connect
               <span className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-blue-400/40 to-indigo-400/40 rounded-full"></span>
             </span>
-          </motion.h2>
-          <motion.p
-            className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed text-center"
-            initial={{ opacity: 0, y: 10 }}
-            animate={controls}
-            variants={{
-              visible: { opacity: 1, y: 0, transition: { duration: 0.5, delay: 0.28, type: 'spring' } }
-            }}
+          </h2>
+          <p
+            className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed text-center animate-fadein-up"
           >
             Have a project in mind or want to discuss potential opportunities? Feel free to reach out through any of the following channels or send me a direct message.
-          </motion.p>
+          </p>
           <div className="w-20 h-1 bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent rounded-full mx-auto mt-8"></div>
-        </motion.div>
-        <div className="grid md:grid-cols-2 gap-10 items-start">
+        </div>
+        <div className="grid md:grid-cols-2 gap-10 items-start animate-fadein-up">
           {/* Contact Form */}
-          <motion.div
-            variants={{ hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0, transition: { duration: 0.7, delay: 0.2, type: 'spring' } } }}
-            whileHover={{ scale: 1.01, boxShadow: '0 8px 40px 0 rgba(59,130,246,0.13)' }}
-            className="bg-white/80 dark:bg-gradient-to-br dark:from-[#101630cc] dark:to-[#1e2746cc] p-6 sm:p-10 rounded-3xl shadow-2xl backdrop-blur-lg border border-blue-100/60 dark:border-blue-900/40 relative overflow-hidden group animate-border-glow"
+          <div
+            className="glass p-6 sm:p-10 rounded-3xl shadow-2xl relative overflow-hidden group animate-border-glow animate-fadein-up"
             style={{ boxShadow: '0 8px 40px 0 rgba(59,130,246,0.13)' }}
           >
             {/* Animated glowing border */}
@@ -187,8 +161,8 @@ const Contact: React.FC = React.memo(() => {
             </h3>
             <form ref={formRef} onSubmit={handleSubmit} className="space-y-7 relative">
               {/* Staggered entrance for fields */}
-              <motion.div className="grid md:grid-cols-2 gap-6 md:gap-8" initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.13 } }, hidden: {} }}>
-                <motion.div variants={{ visible: { opacity: 1, y: 0, transition: { type: 'spring', duration: 0.4 } }, hidden: { opacity: 0, y: 20 } }}>
+              <div className="grid md:grid-cols-2 gap-6 md:gap-8">
+                <div>
                   <label htmlFor="name" className="block text-gray-700 dark:text-gray-300 font-medium mb-2 text-sm">
                     Your Name
                   </label>
@@ -206,8 +180,8 @@ const Contact: React.FC = React.memo(() => {
                       onMouseLeave={() => setCursorVariant('default')}
                     />
                   </div>
-                </motion.div>
-                <motion.div variants={{ visible: { opacity: 1, y: 0, transition: { type: 'spring', duration: 0.4 } }, hidden: { opacity: 0, y: 20 } }}>
+                </div>
+                <div>
                   <label htmlFor="email" className="block text-gray-700 dark:text-gray-300 font-medium mb-2 text-sm">
                     Your Email
                   </label>
@@ -225,9 +199,9 @@ const Contact: React.FC = React.memo(() => {
                       onMouseLeave={() => setCursorVariant('default')}
                     />
                   </div>
-                </motion.div>
-              </motion.div>
-              <motion.div variants={{ visible: { opacity: 1, y: 0, transition: { type: 'spring', duration: 0.4 } }, hidden: { opacity: 0, y: 20 } }}>
+                </div>
+              </div>
+              <div>
                 <label htmlFor="subject" className="block text-gray-700 dark:text-gray-300 font-medium mb-2 text-sm">
                   Subject
                 </label>
@@ -245,8 +219,8 @@ const Contact: React.FC = React.memo(() => {
                     onMouseLeave={() => setCursorVariant('default')}
                   />
                 </div>
-              </motion.div>
-              <motion.div variants={{ visible: { opacity: 1, y: 0, transition: { type: 'spring', duration: 0.4 } }, hidden: { opacity: 0, y: 20 } }}>
+              </div>
+              <div>
                 <label htmlFor="message" className="block text-gray-700 dark:text-gray-300 font-medium mb-2 text-sm">
                   Message
                 </label>
@@ -264,14 +238,12 @@ const Contact: React.FC = React.memo(() => {
                     onMouseLeave={() => setCursorVariant('default')}
                   ></textarea>
                 </div>
-              </motion.div>
+              </div>
               <div className="mt-8">
-                <motion.button
+                <button
                   type="submit"
                   disabled={isSubmitting}
                   className="inline-flex items-center justify-center w-full px-8 py-4 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold rounded-xl shadow-xl hover:shadow-2xl disabled:opacity-70 transition-all duration-300 relative overflow-hidden group"
-                  whileHover={{ scale: 1.08, boxShadow: "0 12px 32px -8px rgba(59,130,246,0.25)" }}
-                  whileTap={{ scale: 0.97 }}
                   onMouseEnter={() => setCursorVariant('button')}
                   onMouseLeave={() => setCursorVariant('default')}
                 >
@@ -290,12 +262,10 @@ const Contact: React.FC = React.memo(() => {
                       <span className="font-semibold">Send Message</span>
                     </div>
                   )}
-                </motion.button>
+                </button>
               </div>
               {submitStatus === 'success' && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
+                <div
                   className="mt-6 px-5 py-4 rounded-xl bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300 flex items-center shadow-sm border border-emerald-100 dark:border-emerald-900/30"
                 >
                   <div className="flex-shrink-0 w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-800/30 flex items-center justify-center text-emerald-500 dark:text-emerald-400 mr-4">
@@ -307,13 +277,11 @@ const Contact: React.FC = React.memo(() => {
                     <h4 className="font-medium text-base">Message Sent Successfully!</h4>
                     <p className="text-sm opacity-90 mt-0.5">Thank you for reaching out. I'll get back to you as soon as possible.</p>
                   </div>
-                </motion.div>
+                </div>
               )}
 
               {submitStatus === 'error' && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
+                <div
                   className="mt-6 px-5 py-4 rounded-xl bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300 flex items-center shadow-sm border border-rose-100 dark:border-rose-900/30"
                 >
                   <div className="flex-shrink-0 w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-800/30 flex items-center justify-center text-rose-500 dark:text-rose-400 mr-4">
@@ -326,16 +294,15 @@ const Contact: React.FC = React.memo(() => {
                     <p className="text-sm opacity-90 mt-0.5">Something went wrong. Please try again or contact me directly via email.</p>
                     {errorMsg && <p className="text-xs mt-1 text-rose-500">Error: {errorMsg}</p>}
                   </div>
-                </motion.div>
+                </div>
               )}
-              <motion.p className="text-xs text-gray-500 dark:text-gray-400 mt-4 text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>Your information is kept private. I usually respond within 24 hours.</motion.p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-4 text-center animate-fadein-up">Your information is kept private. I usually respond within 24 hours.</p>
               <span className="block mt-4 text-center text-sm font-medium">{result}</span>
             </form>
-          </motion.div>
+          </div>
           {/* Contact Info Card */}
-          <motion.div
-            variants={{ hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0, transition: { duration: 0.7, delay: 0.3, type: 'spring' } } }}
-            className="w-full max-w-md mx-auto bg-white/80 dark:bg-gradient-to-br dark:from-[#101630cc] dark:to-[#1e2746cc] p-5 sm:p-8 rounded-3xl shadow-2xl backdrop-blur-lg border border-blue-100/60 dark:border-blue-900/40 flex flex-col gap-2 sm:gap-4 relative overflow-hidden animate-border-glow"
+          <div
+            className="w-full max-w-md mx-auto glass p-5 sm:p-8 rounded-3xl shadow-2xl flex flex-col gap-2 sm:gap-4 relative overflow-hidden animate-border-glow animate-fadein-up"
             style={{ boxShadow: '0 8px 40px 0 rgba(59,130,246,0.13)' }}
           >
             <h3 className="text-xl font-bold mb-4 text-blue-600 dark:text-blue-400 flex items-center gap-2">
@@ -344,12 +311,8 @@ const Contact: React.FC = React.memo(() => {
             </h3>
             <div className="flex flex-col gap-3 sm:gap-4">
               {contactInfo.map((item, i) => (
-                <motion.div
+                <div
                   key={i}
-                  initial={{ opacity: 0, x: 30 }}
-                  animate={controls}
-                  variants={{ visible: { opacity: 1, x: 0, transition: { duration: 0.5, delay: 0.4 + i * 0.08 } } }}
-                  whileHover={{ scale: 1.04, backgroundColor: 'rgba(59,130,246,0.08)' }}
                   className="flex items-center gap-4 px-2 py-3 rounded-2xl transition-all duration-200 cursor-pointer group hover:bg-blue-50/60 dark:hover:bg-blue-900/30"
                 >
                   <span className={`min-w-[48px] min-h-[48px] sm:min-w-[52px] sm:min-h-[52px] flex items-center justify-center rounded-xl bg-gradient-to-br ${item.color} shadow-lg group-hover:scale-110 transition-transform`}>
@@ -360,10 +323,10 @@ const Contact: React.FC = React.memo(() => {
                   ) : (
                     <span className="text-base sm:text-lg font-medium text-blue-700 dark:text-blue-300 break-all transition-colors duration-200">{item.value}</span>
                   )}
-                </motion.div>
+                </div>
               ))}
             </div>
-          </motion.div>
+          </div>
         </div>
         
         {/* Map background pattern - decorative element */}
@@ -372,28 +335,16 @@ const Contact: React.FC = React.memo(() => {
         </div>
       </div>
       {/* Optional floating decorative elements */}
-      <motion.div
-        className="absolute left-[5%] top-[20%] w-12 h-12 rounded-full bg-gradient-to-br from-blue-200/10 to-indigo-300/10 backdrop-blur-md hidden lg:flex"
-        animate={{ y: [0, -15, 0], rotate: [0, 5, 0] }}
-        transition={{ duration: 8, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
+      <div
+        className="absolute left-[5%] top-[20%] w-12 h-12 rounded-full bg-gradient-to-br from-blue-200/10 to-indigo-300/10 backdrop-blur-md hidden lg:flex animate-fadein-up"
       />
-      
-      <motion.div
-        className="absolute right-[10%] bottom-[10%] w-20 h-20 rounded-full bg-gradient-to-tr from-primary-200/5 to-secondary-300/5 backdrop-blur-sm hidden lg:flex"
-        animate={{ y: [0, 20, 0], rotate: [0, -8, 0] }}
-        transition={{ duration: 10, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
+      <div
+        className="absolute right-[10%] bottom-[10%] w-20 h-20 rounded-full bg-gradient-to-tr from-primary-200/5 to-secondary-300/5 backdrop-blur-sm hidden lg:flex animate-fadein-up"
       />
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={controls}
-        variants={{
-          visible: { opacity: 0.5, transition: { duration: 1, delay: 1.2 } }
-        }}
-        className="flex justify-center mt-20"
-      >
+      <div className="flex justify-center mt-20 animate-fadein">
         <div className="w-48 h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent"></div>  
-      </motion.div>
+      </div>
     </section>
   );
 });

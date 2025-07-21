@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
-import { Github, Play, Filter, Globe, ArrowUpRight, Info } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useCursor } from '../contexts/useCursor';
 import ProgressiveImage from './ProgressiveImage';
+import { Github, Play, Filter, Globe, ArrowUpRight, Info } from 'lucide-react';
 
 interface ProjectType {
   id: number;
@@ -22,20 +21,9 @@ interface ProjectType {
 
 const Portfolio: React.FC = () => {
   const { setCursorVariant } = useCursor();
-  const controls = useAnimation();
-  const [ref, inView] = useInView({
-    threshold: 0.1,
-    triggerOnce: true
-  });
   const [activeFilter, setActiveFilter] = useState('all');
   const [showModal, setShowModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState<ProjectType | null>(null);
-
-  useEffect(() => {
-    if (inView) {
-      controls.start('visible');
-    }
-  }, [controls, inView]);
 
   const projects = [
     {
@@ -163,25 +151,15 @@ const Portfolio: React.FC = () => {
   };
 
   return (
-    <section id="portfolio" ref={ref} className="py-24 bg-white dark:bg-gray-900 transition-colors duration-300">
+    <section id="portfolio" className="py-24 bg-white dark:bg-gray-900 transition-colors duration-300 animate-fadein">
       <div className="container mx-auto px-6">
         <div className="max-w-6xl mx-auto">
           {/* Section Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={controls}
-            variants={{
-              visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
-            }}
-            className="text-center mb-16"
-          >
+          <div className="text-center mb-16 animate-fadein">
             <motion.span 
               className="inline-block px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium mb-4"
               initial={{ opacity: 0, y: -10 }}
-              animate={controls}
-              variants={{
-                visible: { opacity: 1, y: 0, transition: { duration: 0.6, delay: 0.2 } }
-              }}
+              animate={{ opacity: 1, y: 0, transition: { duration: 0.6, delay: 0.2 } }}
             >
               My Work
             </motion.span>
@@ -198,17 +176,10 @@ const Portfolio: React.FC = () => {
               A showcase of my web development projects built with React.js, MERN stack, 
               and modern frontend technologies focused on responsive design and exceptional user experience
             </p>
-          </motion.div>
+          </div>
 
           {/* Filter Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={controls}
-            variants={{
-              visible: { opacity: 1, y: 0, transition: { duration: 0.5, delay: 0.3 } }
-            }}
-            className="flex flex-wrap justify-center gap-3 mb-12"
-          >
+          <div className="flex flex-wrap justify-center gap-3 mb-12 animate-fadein-up">
             {filters.map(filter => (
               <motion.button
                 key={filter.id}
@@ -227,30 +198,16 @@ const Portfolio: React.FC = () => {
                 {filter.label}
               </motion.button>
             ))}
-          </motion.div>
+          </div>
 
           {/* Projects Grid */}
-          <motion.div 
-            layout
-            className="grid md:grid-cols-2 lg:grid-cols-3 gap-10"
-            initial="hidden"
-            animate={controls}
-            variants={{
-              visible: { transition: { staggerChildren: 0.13 } },
-              hidden: {},
-            }}
-          >
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 animate-fadein-up">
             <AnimatePresence>
               {filteredProjects.map((project, index) => (
-                <motion.div
+                <div
                   key={project.id}
-                  initial={{ opacity: 0, y: 40, scale: 0.97 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ type: 'spring', stiffness: 180, damping: 18, duration: 0.5, delay: 0.2 + index * 0.08 }}
-                  layout
-                  className={`relative bg-white/70 dark:bg-gradient-to-br dark:from-[#101630cc] dark:to-[#1e2746cc] rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col backdrop-blur-lg border border-blue-100/60 dark:border-blue-900/40 group ${project.featured ? 'md:col-span-2 lg:col-span-1 ring-2 ring-blue-400/40 dark:ring-blue-700/40' : ''}`}
-                  style={{ boxShadow: project.featured ? '0 8px 40px 0 rgba(59,130,246,0.13)' : undefined }}
+                  className={`relative glass rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col group animate-fadein-up ${project.featured ? 'md:col-span-2 lg:col-span-1 ring-2 ring-blue-400/40 dark:ring-blue-700/40' : ''}`}
+                  style={{ boxShadow: project.featured ? '0 8px 40px 0 rgba(59,130,246,0.13)' : undefined, animationDelay: `${0.2 + index * 0.08}s` }}
                 >
                   {/* Project Image with Parallax Hover */}
                   <div className="relative overflow-hidden h-60 group" style={{ perspective: 800 }}>
@@ -375,20 +332,13 @@ const Portfolio: React.FC = () => {
                       </motion.button>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </AnimatePresence>
-          </motion.div>
+          </div>
           
           {/* View More Projects Button */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={controls}
-            variants={{
-              visible: { opacity: 1, transition: { duration: 0.5, delay: 0.7 } }
-            }}
-            className="mt-12 text-center"
-          >
+          <div className="mt-12 text-center animate-fadein-up">
             <motion.a
               href="https://github.com/ByteAcumen"
               target="_blank"
@@ -402,7 +352,7 @@ const Portfolio: React.FC = () => {
               <Github className="inline-block mr-2" size={18} />
               View More Projects on GitHub
             </motion.a>
-          </motion.div>
+          </div>
         </div>
       </div>
 
@@ -421,7 +371,7 @@ const Portfolio: React.FC = () => {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+              className="glass rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
               onClick={e => e.stopPropagation()}
             >
               <div className="relative h-72">

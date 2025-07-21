@@ -1,43 +1,11 @@
-import React, { useEffect } from 'react';
-import { motion, useAnimation } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
+import React from 'react';
 import { Code, Award, Zap } from 'lucide-react';
 import { useCursor } from '../contexts/useCursor';
 import ParticleBackground from './ParticleBackground';
 import ProgressiveImage from './ProgressiveImage';
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 30, scale: 0.95 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      duration: 0.6,
-      delay: 0.2 + i * 0.1,
-      ease: [0.25, 0.46, 0.45, 0.94],
-    },
-  }),
-  hover: {
-    y: -6,
-    scale: 1.02,
-    transition: {
-      duration: 0.3,
-      ease: [0.4, 0, 0.2, 1],
-    },
-  },
-};
-
 const About: React.FC = React.memo(() => {
-  const controls = useAnimation();
   const { setCursorVariant } = useCursor();
-  const [ref, inView] = useInView({ threshold: 0.1, triggerOnce: true });
-
-  useEffect(() => {
-    if (inView) {
-      controls.start('visible');
-    }
-  }, [controls, inView]);
 
   // Card data
   const cards = [
@@ -109,7 +77,7 @@ const About: React.FC = React.memo(() => {
   ];
 
   return (
-    <section id="about" ref={ref} className="py-20 sm:py-24 lg:py-28 min-h-[600px] relative overflow-hidden transition-colors duration-300">
+    <section id="about" className="py-20 sm:py-24 lg:py-28 min-h-[600px] relative overflow-hidden transition-colors duration-300 animate-fadein">
       {/* Hero-style Background */}
       <div className="absolute inset-0 z-0 pointer-events-none will-change-transform will-change-opacity">
         {/* Light Theme */}
@@ -131,42 +99,31 @@ const About: React.FC = React.memo(() => {
         <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-white/5 dark:to-black/5" />
       </div>
       <div className="container mx-auto px-6 max-w-6xl relative z-10 will-change-transform will-change-opacity">
-        <motion.span 
-          className="inline-block px-4 py-2 bg-blue-100/80 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium mb-4 sm:mb-6 shadow-sm"
-          initial={{ opacity: 0, y: -10 }}
-          animate={controls}
-          variants={{ visible: { opacity: 1, y: 0, transition: { duration: 0.6, delay: 0.2 } } }}
+        <span 
+          className="inline-block px-4 py-2 bg-blue-100/80 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium mb-4 sm:mb-6 shadow-sm animate-fadein"
         >
           About Me
-        </motion.span>
-        <motion.h2 
-          className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 tracking-tight text-center"
+        </span>
+        <h2 
+          className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 tracking-tight text-center animate-fadein-left"
           onMouseEnter={() => setCursorVariant('text')}
           onMouseLeave={() => setCursorVariant('default')}
         >
           Crafting <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Digital Excellence</span>
-        </motion.h2>
-        <motion.p 
-          className="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed text-center mb-12"
-          initial={{ opacity: 0 }}
-          animate={controls}
-          variants={{ visible: { opacity: 1, transition: { duration: 0.6, delay: 0.4 } } }}
+        </h2>
+        <p 
+          className="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed text-center mb-12 animate-fadein"
         >
           A passionate final-year Computer Science student from Bangalore, India, specializing in full-stack development and AI/ML technologies with a love for open-source contribution and hackathon participation.
-        </motion.p>
+        </p>
         {/* Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 justify-center items-stretch">
           {cards.map((card, i) => (
-            <motion.div
+            <div
               key={card.title}
-              custom={i}
-              initial="hidden"
-              animate={controls}
-              variants={cardVariants}
-              whileHover="hover"
-              className="group h-full"
+              className="group h-full animate-fadein-up"
             >
-              <div className="flex flex-col items-start justify-start bg-white/80 dark:bg-gray-900/80 p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 h-full backdrop-blur-sm hover:bg-white/95 dark:hover:bg-gray-900/95 hover:shadow-xl transition-all duration-300">
+              <div className="flex flex-col items-start justify-start glass p-6 sm:p-8 rounded-2xl h-full transition-all duration-300">
                 <div className="flex items-center mb-4 sm:mb-5">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl bg-blue-50/80 dark:bg-blue-900/30 mr-3 sm:mr-4 transition-all duration-300 group-hover:scale-110">
                     {card.icon}
@@ -175,7 +132,7 @@ const About: React.FC = React.memo(() => {
                 </div>
                 <div className="flex-1 w-full">{card.content}</div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

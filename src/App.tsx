@@ -1,7 +1,6 @@
 import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { CursorProvider } from './contexts/CursorContext';
-import Cursor from './components/Cursor';
 import ParticleBackground from './components/ParticleBackground';
 import ResumeModal from './components/ResumeModal';
 
@@ -57,12 +56,11 @@ const App: React.FC = () => {
             role="application"
             aria-label="Portfolio Application"
           >
-            <Cursor />
             <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-gray-600 dark:text-gray-300">Loading...</div>}>
               <LoadingScreen />
               <ParticleBackground className="opacity-50 z-[-10]" /> {/* Simplified with consistent opacity */}
               <Header openResumeModal={openResumeModal} />
-              <main className="relative z-10" id="main-content" role="main">
+              <main className="relative z-10 glass" id="main-content" role="main">
                 <Hero openResumeModal={openResumeModal} />
                 <About />
                 <Experience />
