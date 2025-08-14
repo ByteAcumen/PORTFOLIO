@@ -1,0 +1,207 @@
+/* Performance optimizations for smooth animations and scrolling */
+
+/* Enable hardware acceleration for common animated elements */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+.will-change-auto {
+  will-change: auto;
+}
+
+/* Force hardware acceleration */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Optimize scrolling performance */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeSpeed;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Optimize images and media */
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Optimize blur effects */
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+}
+
+.backdrop-blur {
+  backdrop-filter: blur(8px);
+}
+
+.backdrop-blur-md {
+  backdrop-filter: blur(12px);
+}
+
+.backdrop-blur-lg {
+  backdrop-filter: blur(16px);
+}
+
+.backdrop-blur-xl {
+  backdrop-filter: blur(24px);
+}
+
+.backdrop-blur-2xl {
+  backdrop-filter: blur(40px);
+}
+
+.backdrop-blur-3xl {
+  backdrop-filter: blur(64px);
+}
+
+/* Optimize gradients for better performance */
+.gradient-optimized {
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* Optimize animations */
+.animate-optimized {
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Optimize transforms */
+.transform-optimized {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+/* Container queries optimization */
+.container-optimized {
+  contain: layout style paint;
+}
+
+/* Optimize text rendering */
+.text-optimized {
+  text-rendering: optimizeSpeed;
+  font-display: swap;
+}
+
+/* Optimize shadows */
+.shadow-optimized {
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.1));
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  /* Reduce blur effects on mobile */
+  .backdrop-blur-3xl {
+    backdrop-filter: blur(20px);
+  }
+  
+  .backdrop-blur-2xl {
+    backdrop-filter: blur(16px);
+  }
+  
+  .backdrop-blur-xl {
+    backdrop-filter: blur(12px);
+  }
+  
+  /* Simplify gradients on mobile */
+  .gradient-mobile-simple {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  }
+  
+  /* Reduce animation complexity on mobile */
+  .animate-mobile-simple {
+    animation-duration: 0.3s;
+    animation-timing-function: ease-out;
+  }
+}
+
+/* High performance mode for low-end devices */
+@media (max-width: 480px) {
+  /* Disable complex animations on very small screens */
+  .complex-animation {
+    animation: none !important;
+    transform: none !important;
+  }
+  
+  /* Simplify blur effects */
+  .backdrop-blur-3xl,
+  .backdrop-blur-2xl,
+  .backdrop-blur-xl {
+    backdrop-filter: blur(8px);
+  }
+  
+  /* Reduce shadow complexity */
+  .shadow-lg,
+  .shadow-xl,
+  .shadow-2xl {
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  }
+}
+
+/* Optimize for dark mode */
+@media (prefers-color-scheme: dark) {
+  .dark-optimized {
+    color-scheme: dark;
+  }
+}
+
+/* Optimize for high refresh rate displays */
+@media (min-resolution: 120dpi) {
+  .high-refresh-optimized {
+    animation-timing-function: linear;
+  }
+}
+
+/* Optimize for touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .touch-optimized {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+}
+
+/* Performance utilities */
+.performance-optimized {
+  contain: layout style paint;
+  content-visibility: auto;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.performance-optimized-scroll {
+  overflow-anchor: none;
+  overscroll-behavior: contain;
+}
+
+.performance-optimized-text {
+  font-display: swap;
+  text-rendering: optimizeSpeed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

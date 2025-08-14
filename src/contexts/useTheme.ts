@@ -2,13 +2,15 @@ import { useContext } from 'react';
 import { ThemeContext, ThemeContextType } from './ThemeContext';
 
 /**
- * useTheme provides access to theme state and actions.
- * Throws if used outside ThemeProvider.
+ * A professional-grade hook to access the global theme state and actions.
+ *
+ * This hook is guaranteed to return a valid context value, as a default is
+ * provided at the root. This allows components to safely access theme
+ * properties without checks.
+ *
+ * @returns {ThemeContextType} The theme context, including `isDark`,
+ * `accentColor`, and the stable action functions (`toggleTheme`, `setAccentColor`).
  */
 export const useTheme = (): ThemeContextType => {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
+  return useContext(ThemeContext);
 };

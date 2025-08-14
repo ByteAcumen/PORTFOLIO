@@ -1,345 +1,510 @@
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { useTheme } from '../contexts/useTheme';
-import { useCursor } from '../contexts/useCursor';
-import { ExternalLink } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useSpring, useReducedMotion } from 'framer-motion';
+import { Menu, X, Home, User, Briefcase, Code, FolderOpen, Mail, Sparkles } from 'lucide-react';
 import ThemeSwitcher from './ThemeSwitcher';
-import Logo from './Logo';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useCursor } from '../contexts/useCursor';
+import { gsap } from 'gsap';
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 
-// Navigation link type
-interface NavLink {
-  id: string;
-  label: string;
-  isExternal?: boolean;
-  href?: string;
-}
+gsap.registerPlugin(ScrollToPlugin);
 
-const navItems: NavLink[] = [
-  { id: 'home', label: 'Home' },
-  { id: 'about', label: 'About' },
-  { id: 'experience', label: 'Experience' },
-  { id: 'skills', label: 'Skills' },
-  { id: 'portfolio', label: 'Portfolio' },
-  { id: 'contact', label: 'Contact' },
-  { id: 'resume', label: 'Resume', isExternal: true },
-];
+const Header: React.FC = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('hero');
+  const headerRef = useRef<HTMLElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout>();
+  const { setCursor, resetCursor } = useCursor();
+  
+  // Enhanced scroll tracking with smooth spring animations
+  const { scrollY } = useScroll();
+  const scrollYMotion = useMotionValue(0);
+  const prefersReducedMotion = useReducedMotion();
+  const scrollYSpring = useSpring(scrollYMotion, { stiffness: 400, damping: 40 });
+  
+  // Smooth transforms for header effects (respect reduced motion)
+  const headerOpacity = useTransform(scrollYSpring, [0, 100], [0.02, 0.08]);
+  const headerBlur = useTransform(scrollYSpring, [0, 100], [12, 24]);
+  // Always call hooks; select value based on preference to satisfy hooks rules
+  const rawHeaderScale = useTransform(scrollYSpring, [0, 50], [1, 0.98]);
+  const staticHeaderScale = useMotionValue(1);
+  const headerScale = prefersReducedMotion ? staticHeaderScale : rawHeaderScale;
 
-interface HeaderProps {
-  openResumeModal: () => void;
-}
+  // Memoized menu items
+  const menuItems = useMemo(() => [
+    { href: '#hero', label: 'Home', icon: Home },
+    { href: '#about', label: 'About', icon: User },
+    { href: '#experience', label: 'Experience', icon: Briefcase },
+    { href: '#skills', label: 'Skills', icon: Code },
+    { href: '#projects', label: 'Projects', icon: FolderOpen },
+    { href: '#contact', label: 'Contact', icon: Mail },
+  ], []);
 
-// Use the unified glass class for consistent glassmorphism
-const glassBg = 'glass';
-
-const Header: React.FC<HeaderProps> = React.memo(({ openResumeModal }) => {
-  const { isDark } = useTheme();
-  const { setCursorVariant } = useCursor();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [activeSection, setActiveSection] = useState('home');
-  const tickingRef = useRef(false);
-  const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
-  const sectionIds = ['home', 'about', 'experience', 'skills', 'portfolio', 'contact'];
-
-  // Cache section elements on mount and after lazy components load
-  const recacheSections = useCallback(() => {
-    sectionIds.forEach(id => {
-      sectionRefs.current[id] = document.getElementById(id);
+  // Sync scroll motion value with actual scroll position
+  useEffect(() => {
+    const unsubscribe = scrollY.on('change', (latest) => {
+      scrollYMotion.set(latest);
     });
-  }, [sectionIds]);
-  useEffect(() => {
-    recacheSections();
-    // Also recache after Suspense resolves (all main sections loaded)
-    setTimeout(recacheSections, 1200); // 1.2s after mount for lazy load
-  }, [recacheSections]);
+    return unsubscribe;
+  }, [scrollY, scrollYMotion]);
 
-  // Debounced scroll handler for sticky header and active section
-  useEffect(() => {
-    let lastCall = 0;
-    const debounce = 60; // ms
-    const handleScroll = () => {
-      const now = Date.now();
-      if (now - lastCall < debounce) return;
-      lastCall = now;
-      if (!tickingRef.current) {
-        tickingRef.current = true;
-        window.requestAnimationFrame(() => {
-          setScrolled(window.scrollY > 30);
-          let foundSection = 'home';
-          for (let i = 0; i < sectionIds.length; i++) {
-            const el = sectionRefs.current[sectionIds[i]];
-            if (el) {
-              const rect = el.getBoundingClientRect();
-              if (rect.top <= 100 && rect.bottom > 100) {
-                foundSection = sectionIds[i];
-                break;
-              }
+
+
+  // Optimized scroll handler with intersection observer for better performance
+  const handleScroll = useCallback(() => {
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+    
+    scrollTimeoutRef.current = setTimeout(() => {
+      const sections = ['hero', 'about', 'experience', 'skills', 'projects', 'contact'];
+      const offset = window.innerHeight * 0.3;
+      
+      for (const section of sections) {
+        const element = document.getElementById(section);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          if (rect.top <= offset && rect.bottom >= offset) {
+            if (section !== activeSection) {
+              setActiveSection(section);
             }
+            break;
           }
-          setActiveSection(prev => (prev !== foundSection ? foundSection : prev));
-          tickingRef.current = false;
+        }
+      }
+    }, 50); // Reduced timeout for more responsive updates
+  }, [activeSection]);
+
+  // Enhanced scroll listener with better performance
+  useEffect(() => {
+    let rafId: number;
+    let ticking = false;
+
+    const throttledScroll = () => {
+      if (!ticking) {
+        rafId = requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
         });
+        ticking = true;
       }
     };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [sectionIds]);
 
-  // Smooth scroll to section - Optimized
-  const scrollToSection = useCallback((sectionId: string) => {
-    const element = sectionRefs.current[sectionId] || document.getElementById(sectionId);
-    if (element) {
-      const offset = 72; // Slightly smaller for new header
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - offset;
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth',
-      });
-      setActiveSection(sectionId);
-      setIsMenuOpen(false);
-    }
-  }, []);
-
-  // Toggle mobile menu
-  const toggleMenu = useCallback(() => {
-    setIsMenuOpen((prev) => !prev);
-  }, []);
-
-  // Close menu on ESC key (accessibility)
-  useEffect(() => {
-    if (!isMenuOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsMenuOpen(false);
+    // Initial call after a tick to ensure DOM is ready
+    const initId = requestAnimationFrame(() => handleScroll());
+    
+    // Use passive listener for better performance
+    window.addEventListener('scroll', throttledScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', throttledScroll);
+      if (rafId) cancelAnimationFrame(rafId);
+      cancelAnimationFrame(initId);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isMenuOpen]);
+  }, [handleScroll]);
 
-  // Memoize nav items for better performance
-  const memoizedNavItems = useMemo(() => navItems, []);
+  // Smooth scrolling
+  const scrollToSection = useCallback((sectionId: string) => {
+    const element = document.querySelector(sectionId);
+    if (element) {
+      gsap.to(window, {
+        duration: prefersReducedMotion ? 0 : 0.8,
+        scrollTo: { y: element, offsetY: 80 },
+        ease: "power2.out"
+      });
+      setIsMobileMenuOpen(false);
+    }
+  }, [prefersReducedMotion]);
 
-  // Animation variants
-  const headerVariants = {
-    initial: { y: -64, opacity: 0 },
-    animate: { y: 0, opacity: 1, transition: { duration: 0.5, ease: 'easeOut' } },
-    scrolled: {
-      boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.12)',
-      background: isDark
-        ? 'rgba(16, 24, 39, 0.75)'
-        : 'rgba(255, 255, 255, 0.75)',
-      transition: { duration: 0.3 },
-    },
-  };
+  // Keyboard and body scroll management
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    if (isMobileMenuOpen) {
+      document.addEventListener('keydown', handleEscape);
+      // Prevent body scroll, preserving current scroll position
+      const scrollY = window.scrollY;
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+
+      return () => {
+        document.removeEventListener('keydown', handleEscape);
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        window.scrollTo(0, scrollY);
+      };
+    } else {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+    };
+  }, [isMobileMenuOpen]);
 
   return (
     <motion.header
-      variants={headerVariants}
-      initial="initial"
-      animate="animate"
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${glassBg} ${scrolled ? 'shadow-2xl' : 'shadow-lg'} px-2 md:px-0`}
-      style={{
-        borderRadius: '0 0 1.5rem 1.5rem',
-        borderBottom: isDark ? '1.5px solid #33415544' : '1.5px solid #e0e7ef44',
-        transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
+      ref={headerRef}
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.8, ease: [0.25, 0.25, 0, 1] }}
+      style={{ 
+        backgroundColor: `rgba(255, 255, 255, ${headerOpacity})`,
+        backdropFilter: `blur(${headerBlur}px) saturate(180%)`,
+        scale: headerScale,
+        transformOrigin: 'top center',
       }}
-      role="banner"
-      aria-label="Main navigation"
+      className="app-header fixed top-0 left-0 right-0 z-50 bg-white/[0.02] dark:bg-black/[0.02] border-b border-white/[0.08] dark:border-white/[0.05] backdrop-blur-2xl supports-[backdrop-filter]:bg-white/[0.08] dark:supports-[backdrop-filter]:bg-black/[0.08] shadow-lg shadow-black/[0.02] dark:shadow-black/[0.2] transition-shadow duration-300 after:absolute after:inset-0 after:pointer-events-none after:bg-[radial-gradient(60%_60%_at_20%_0%,rgba(59,130,246,0.10),transparent_60%)] after:content-['']"
     >
-      {/* Animated gradient overlay for glass effect */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none rounded-b-3xl"
-        style={{
-          background:
-            'linear-gradient(120deg,rgba(99,102,241,0.08) 0%,rgba(139,92,246,0.08) 100%)',
-          zIndex: 0,
-        }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.7, ease: 'easeOut' }}
-      />
-      <div className="w-full max-w-screen-xl mx-auto px-2 md:px-6 flex items-center justify-between relative z-10 min-h-[64px] pt-safe-top">
-        {/* Logo and Name */}
-        <a
-          href="#home"
-          onClick={e => {
-            e.preventDefault();
-            scrollToSection('home');
-          }}
-          className="text-2xl font-bold relative group flex items-center gap-2 gpu-accelerated select-none"
-          onMouseEnter={() => setCursorVariant('text')}
-          onMouseLeave={() => setCursorVariant('default')}
-          aria-label="HEMANTH K - Home"
-        >
-          <div className="relative gpu-accelerated">
-            <Logo size={32} isDark={isDark} showPulse={true} />
-            <div className="absolute inset-0 bg-blue-500/30 dark:bg-blue-400/30 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          </div>
-          <motion.span
-            className="inline-block bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 transition-all duration-300 group-hover:scale-110 group-hover:translate-y-[-2px] gpu-accelerated text-[1.45rem] sm:text-2xl font-extrabold tracking-tight"
-            initial={{ opacity: 0, x: -16 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, type: 'spring' }}
-          >
-            HEMANTH KUMAR
-          </motion.span>
-        </a>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-2 relative" aria-label="Primary">
-          {memoizedNavItems.map((item, idx) => (
-            <div key={item.id} className="relative px-2">
-              <a
-                href={item.isExternal ? undefined : `#${item.id}`}
-                onClick={e => {
-                  if (item.id === 'resume') {
-                    e.preventDefault();
-                    openResumeModal();
-                  } else if (!item.isExternal) {
-                    e.preventDefault();
-                    scrollToSection(item.id);
-                  }
-                }}
-                target={item.isExternal && item.id !== 'resume' ? '_blank' : undefined}
-                rel={item.isExternal && item.id !== 'resume' ? 'noopener noreferrer' : undefined}
-                className={`px-2 py-2 text-base font-medium flex items-center relative transition-all duration-300 focus:outline-none gpu-accelerated
-                  ${activeSection === item.id
-                    ? 'text-blue-700 dark:text-blue-400'
-                    : 'text-gray-800 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'}
-                `}
-                onMouseEnter={() => setCursorVariant('button')}
-                onMouseLeave={() => setCursorVariant('default')}
-                aria-label={item.isExternal ? `Open ${item.label}` : `Navigate to ${item.label} section`}
-                tabIndex={0}
-              >
-                <span className="relative z-10 transition-all duration-300 group-hover:-translate-y-1 group-hover:scale-105 flex items-center gpu-accelerated">
-                  {item.label}
-                  {item.isExternal && <ExternalLink className="ml-1" size={12} />}
-                </span>
-                {/* Animated underline only for active link */}
-                {activeSection === item.id && (
-                  <motion.span
-                    layoutId="nav-underline"
-                    className="absolute left-0 right-0 bottom-0 h-0.5 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"
-                    style={{ zIndex: 1 }}
-                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                  />
-                )}
-              </a>
-            </div>
-          ))}
-        </nav>
-
-        {/* Theme Switcher (always visible on mobile and desktop) */}
-        <div className="flex items-center ml-2 md:ml-4">
+      <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex items-center justify-between">
+          {/* Professional Logo & Name */}
           <motion.div
-            initial={{ scale: 0, rotate: -180, opacity: 0 }}
-            animate={{ scale: 1, rotate: 0, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.7, type: 'spring' }}
-            className="theme-switcher"
+            initial={{ opacity: 0, x: -30, scale: 0.8 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.25, 0, 1] }}
+            className="flex items-center gap-4 cursor-pointer group"
+            onClick={() => scrollToSection('#hero')}
+            onMouseEnter={() => setCursor('button')}
+            onMouseLeave={() => resetCursor()}
           >
-            <ThemeSwitcher />
+            <motion.div 
+              className="relative"
+              whileHover={{ scale: 1.05, rotate: 2 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            >
+              {/* Glass morphism background for logo */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              {/* Logo container with enhanced glass effect */}
+              <div className="relative p-3 bg-white/10 dark:bg-white/5 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl shadow-lg shadow-black/5 dark:shadow-black/20 transition-all duration-300 group-hover:bg-white/20 dark:group-hover:bg-white/10 group-hover:border-white/30 dark:group-hover:border-white/20">
+                <div className="relative">
+                  {/* Sparkle effect */}
+                  <motion.div
+                    className="absolute -top-1 -right-1"
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 1 }}
+                  >
+                    <Sparkles className="w-3 h-3 text-blue-500 dark:text-blue-400" />
+                  </motion.div>
+                  
+                  <img 
+                    src="/favicon.svg" 
+                    alt="HK Logo" 
+                    className="w-8 h-8 invert dark:invert-0 transition-transform duration-300 group-hover:rotate-12"
+                  />
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+            >
+              <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent tracking-tight">
+                HEMANTH KUMAR
+              </h1>
+              <motion.p 
+                className="text-sm text-gray-600/80 dark:text-gray-400/80 font-medium hidden sm:block"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.5 }}
+              >
+                <span className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+                  Full-Stack Developer
+                </span>
+              </motion.p>
+            </motion.div>
+          </motion.div>
+
+          {/* Professional Desktop Navigation */}
+          <div className="hidden lg:flex items-center">
+            <motion.nav 
+              className="flex items-center p-2 bg-white/10 dark:bg-black/10 backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-2xl shadow-lg shadow-black/5 dark:shadow-black/20"
+              initial={{ opacity: 0, y: -20, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.4, ease: [0.25, 0.25, 0, 1] }}
+            >
+              {menuItems.map((item, index) => {
+                const Icon = item.icon;
+                const isActive = activeSection === item.href.substring(1);
+                
+                return (
+                  <motion.div
+                    key={item.href}
+                    className="relative"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
+                  >
+                    {/* Active indicator background */}
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeNavItem"
+                        className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-90"
+                        initial={false}
+                        transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                      />
+                    )}
+                    
+                    <motion.button
+                      onClick={() => scrollToSection(item.href)}
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      whileTap={{ scale: 0.95 }}
+                      onMouseEnter={() => setCursor('button')}
+                      onMouseLeave={() => resetCursor()}
+                      className={`relative flex items-center gap-2.5 px-4 py-2.5 mx-1 rounded-xl font-medium text-sm transition-all duration-300 group ${
+                        isActive
+                          ? 'text-white shadow-lg shadow-blue-500/20'
+                          : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-white/20 dark:hover:bg-white/10'
+                      }`}
+                    >
+                      {/* Icon with enhanced animations */}
+                      <motion.div
+                        whileHover={{ rotate: isActive ? 0 : 10 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <Icon size={16} className={isActive ? 'drop-shadow-sm' : ''} />
+                      </motion.div>
+                      
+                      <span className={`${isActive ? 'drop-shadow-sm' : ''} tracking-wide`}>
+                        {item.label}
+                      </span>
+                      
+                      {/* Hover glow effect */}
+                      {!isActive && (
+                        <motion.div
+                          className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100"
+                          transition={{ duration: 0.3 }}
+                        />
+                      )}
+                    </motion.button>
+                  </motion.div>
+                );
+              })}
+            </motion.nav>
+          </div>
+
+          {/* Professional Tablet Navigation Icons */}
+          <motion.div 
+            className="hidden md:flex lg:hidden items-center gap-2 p-2 bg-white/10 dark:bg-black/10 backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-2xl shadow-lg shadow-black/5 dark:shadow-black/20"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+          >
+            {menuItems.slice(0, 4).map((item, index) => {
+              const Icon = item.icon;
+              const isActive = activeSection === item.href.substring(1);
+              
+              return (
+                <motion.div key={item.href} className="relative">
+                  {/* Active indicator for tablet */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeTabletItem"
+                      className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-90"
+                      initial={false}
+                      transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                    />
+                  )}
+                  
+                  <motion.button
+                    onClick={() => scrollToSection(item.href)}
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.4, delay: 0.7 + index * 0.1 }}
+                    whileHover={{ scale: 1.1, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    onMouseEnter={() => setCursor('button')}
+                    onMouseLeave={() => resetCursor()}
+                    className={`relative p-3 rounded-xl transition-all duration-300 group ${
+                      isActive
+                        ? 'text-white shadow-lg shadow-blue-500/20'
+                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/20 dark:hover:bg-white/10'
+                    }`}
+                    title={item.label}
+                  >
+                    <motion.div
+                      whileHover={{ rotate: isActive ? 0 : 15 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Icon size={18} className={isActive ? 'drop-shadow-sm' : ''} />
+                    </motion.div>
+                    
+                    {/* Hover glow effect */}
+                    {!isActive && (
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100"
+                        transition={{ duration: 0.3 }}
+                      />
+                    )}
+                  </motion.button>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+
+          {/* Professional Theme Switcher & Mobile Menu */}
+          <motion.div 
+            className="flex items-center gap-3"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.8 }}
+          >
+            {/* Enhanced Theme Switcher Container */}
+            <motion.div 
+              className="bg-white/10 dark:bg-black/10 backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-2xl p-1.5 shadow-lg shadow-black/5 dark:shadow-black/20 transition-all duration-300 hover:bg-white/15 dark:hover:bg-white/10"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <ThemeSwitcher />
+            </motion.div>
+            
+            {/* Professional Mobile Menu Button */}
+            <motion.button
+              whileHover={{ scale: 1.05, rotate: isMobileMenuOpen ? 90 : 0 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              onMouseEnter={() => setCursor('button')}
+              onMouseLeave={() => resetCursor()}
+              className="lg:hidden p-3 bg-white/10 dark:bg-black/10 backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-2xl text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-all duration-300 shadow-lg shadow-black/5 dark:shadow-black/20 hover:bg-white/20 dark:hover:bg-white/10"
+              aria-label="Toggle mobile menu"
+            >
+              <motion.div
+                animate={{ rotate: isMobileMenuOpen ? 180 : 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              </motion.div>
+            </motion.button>
           </motion.div>
         </div>
 
-        {/* Mobile Hamburger */}
-        <button
-          className="md:hidden flex flex-col justify-center items-center w-12 h-12 focus:outline-none bg-transparent ml-2 transition-all duration-300 hover:scale-110 rounded-full active:bg-blue-100 dark:active:bg-blue-900"
-          aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-          aria-expanded={isMenuOpen}
-          aria-controls="mobile-menu"
-          onClick={toggleMenu}
-          onMouseEnter={() => setCursorVariant('button')}
-          onMouseLeave={() => setCursorVariant('default')}
-        >
-          <motion.span
-            className={`block w-6 h-0.5 bg-blue-600 dark:bg-blue-400 mb-1 rounded transition-all duration-500 ease-out ${isMenuOpen ? 'rotate-45 translate-y-2' : ''}`}
-            layout
-          ></motion.span>
-          <motion.span
-            className={`block w-6 h-0.5 bg-blue-600 dark:bg-blue-400 mb-1 rounded transition-all duration-500 ease-out ${isMenuOpen ? 'opacity-0 scale-0' : ''}`}
-            layout
-          ></motion.span>
-          <motion.span
-            className={`block w-6 h-0.5 bg-blue-600 dark:bg-blue-400 rounded transition-all duration-500 ease-out ${isMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}
-            layout
-          ></motion.span>
-        </button>
-      </div>
-
-      {/* Mobile Menu - Dropdown below header */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.nav
-            id="mobile-menu"
-            initial={{ opacity: 0, y: -24 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -24 }}
-            transition={{ duration: 0.32, ease: 'easeOut' }}
-            className="md:hidden absolute top-full left-0 w-full z-50 shadow-2xl rounded-b-2xl overflow-y-auto max-h-[80vh]"
-            aria-label="Mobile navigation"
-            role="navigation"
-            style={{
-              borderBottomLeftRadius: '1.25rem',
-              borderBottomRightRadius: '1.25rem',
-            }}
-          >
-            {/* Glassy semi-opaque background for better contrast */}
-            <div className="absolute inset-0 bg-white/60 dark:bg-gray-900/70 backdrop-blur-md rounded-b-2xl pointer-events-none" />
-            <div className="relative z-10">
-              {/* Close button inside menu, top right */}
-              <button
-                className="absolute top-3 right-3 w-10 h-10 rounded-full flex items-center justify-center bg-black/30 dark:bg-white/10 text-white dark:text-gray-200 hover:bg-white hover:text-gray-900 dark:hover:bg-gray-200 dark:hover:text-gray-900 transition-colors z-70 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                aria-label="Close menu"
-                onClick={() => setIsMenuOpen(false)}
-                tabIndex={0}
+        {/* Professional Mobile Navigation Menu */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              ref={mobileMenuRef}
+              className="lg:hidden mt-6 overflow-hidden"
+              initial={{ opacity: 0, height: 0, y: -20, scale: 0.95 }}
+              animate={{ opacity: 1, height: "auto", y: 0, scale: 1 }}
+              exit={{ opacity: 0, height: 0, y: -20, scale: 0.95 }}
+              transition={{ 
+                duration: 0.4, 
+                ease: [0.25, 0.1, 0.25, 1],
+                height: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] },
+                scale: { duration: 0.3 }
+              }}
+            >
+              <motion.div 
+                className="bg-white/10 dark:bg-black/10 backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-2xl p-3 shadow-xl shadow-black/10 dark:shadow-black/30 transition-all duration-300"
+                initial={{ scale: 0.95, opacity: 0.8 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
               >
-                <span className="text-2xl">✕</span>
-              </button>
-              <ul className="flex flex-col gap-2 py-4 px-2 sm:px-6 animate-fadein-up">
-                {memoizedNavItems.map((item) => (
-                  <li key={item.id}>
-                    <a
-                      href={item.isExternal ? undefined : `#${item.id}`}
-                      onClick={e => {
-                        if (item.id === 'resume') {
-                          e.preventDefault();
-                          openResumeModal();
-                          setIsMenuOpen(false);
-                        } else if (!item.isExternal) {
-                          e.preventDefault();
-                          scrollToSection(item.id);
-                          setIsMenuOpen(false);
-                        }
-                      }}
-                      target={item.isExternal && item.id !== 'resume' ? '_blank' : undefined}
-                      rel={item.isExternal && item.id !== 'resume' ? 'noopener noreferrer' : undefined}
-                      className={`block w-full px-4 py-4 text-lg sm:text-lg font-semibold transition-all duration-300 focus:outline-none rounded-xl text-center ${
-                        activeSection === item.id
-                          ? 'text-blue-700 dark:text-blue-300 bg-blue-50/60 dark:bg-blue-900/30'
-                          : 'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50/40 dark:hover:bg-blue-900/20'
-                      }`}
-                      style={{ minHeight: 56 }}
-                      onMouseEnter={() => setCursorVariant('button')}
-                      onMouseLeave={() => setCursorVariant('default')}
-                      aria-label={item.isExternal ? `Open ${item.label}` : `Navigate to ${item.label} section`}
-                      tabIndex={0}
-                    >
-                      {item.label}
-                      {item.isExternal && <ExternalLink className="ml-2 inline" size={16} />}
-                    </a>
-                  </li>
-                ))}
-                <li className="mt-2 flex justify-center">
-                  <ThemeSwitcher />
-                </li>
-              </ul>
-            </div>
-          </motion.nav>
-        )}
-      </AnimatePresence>
+                <div className="space-y-2">
+                  {menuItems.map((item, index) => {
+                    const Icon = item.icon;
+                    const isActive = activeSection === item.href.substring(1);
+                    
+                    return (
+                      <motion.div
+                        key={item.href}
+                        className="relative"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.4, delay: 0.2 + index * 0.1 }}
+                      >
+                        {/* Active indicator for mobile */}
+                        {isActive && (
+                          <motion.div
+                            layoutId="activeMobileItem"
+                            className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl opacity-90"
+                            initial={false}
+                            transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                          />
+                        )}
+                        
+                        <motion.button
+                          onClick={() => scrollToSection(item.href)}
+                          whileHover={{ x: 6, scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onMouseEnter={() => setCursor('button')}
+                          onMouseLeave={() => resetCursor()}
+                          className={`relative flex items-center gap-4 w-full px-4 py-4 rounded-xl transition-all duration-300 font-medium text-sm group ${
+                            isActive
+                              ? 'text-white shadow-lg shadow-blue-500/20'
+                              : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-white/20 dark:hover:bg-white/10'
+                          }`}
+                        >
+                          {/* Enhanced icon container */}
+                          <motion.div 
+                            className={`relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                              isActive
+                                ? 'bg-white/20 dark:bg-black/20 shadow-lg'
+                                : 'bg-white/20 dark:bg-white/10 group-hover:bg-white/30 dark:group-hover:bg-white/15'
+                            }`}
+                            whileHover={{ rotate: isActive ? 0 : 10 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            {/* Icon glow effect */}
+                            <div className={`absolute inset-0 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${isActive ? 'opacity-30' : ''}`} />
+                            <Icon size={18} className={`relative z-10 ${isActive ? 'drop-shadow-sm' : ''}`} />
+                          </motion.div>
+                          
+                          <span className={`flex-1 text-left tracking-wide ${isActive ? 'drop-shadow-sm font-semibold' : ''}`}>
+                            {item.label}
+                          </span>
+                          
+                          {/* Active indicator dot */}
+                          {isActive && (
+                            <motion.div 
+                              className="w-2 h-2 bg-white rounded-full shadow-lg"
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              transition={{ duration: 0.3, delay: 0.2 }}
+                            />
+                          )}
+                          
+                          {/* Hover glow effect */}
+                          {!isActive && (
+                            <motion.div
+                              className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100"
+                              transition={{ duration: 0.3 }}
+                            />
+                          )}
+                        </motion.button>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </nav>
     </motion.header>
   );
-});
+};
 
-export default Header;
+export default React.memo(Header);

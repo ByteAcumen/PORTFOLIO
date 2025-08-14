@@ -1,109 +1,88 @@
 import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
-const LoadingScreen: React.FC = () => {
-  const [isLoading, setIsLoading] = useState(true);
+interface LoadingScreenProps {
+  onFinished: () => void;
+}
+
+const LoadingScreen: React.FC<LoadingScreenProps> = ({ onFinished }) => {
   const [progress, setProgress] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
-    // Faster, smoother loading
-    const timer = setInterval(() => {
+    // Simulate loading progress
+    const interval = setInterval(() => {
       setProgress(prev => {
-        // Smoother, more linear progress
-        const increment = prev < 80 ? 3 : 1.5;
         if (prev >= 100) {
-          clearInterval(timer);
-          setTimeout(() => setIsLoading(false), 300); // fade out faster
+          clearInterval(interval);
+          setTimeout(() => {
+            setIsComplete(true);
+            setTimeout(onFinished, 500); // Allow fade out animation
+          }, 300);
           return 100;
         }
-        return Math.min(prev + increment, 100);
+        return prev + Math.random() * 15;
       });
-    }, 18); // faster interval
-    return () => clearInterval(timer);
-  }, []);
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [onFinished]);
 
   return (
-    <AnimatePresence>
-      {isLoading && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.4, ease: "easeInOut" }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-[#f7faff] to-[#e8eaf6] dark:from-gray-900 dark:to-gray-800"
+    <motion.div 
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-background"
+      initial={{ opacity: 1 }}
+      animate={{ opacity: isComplete ? 0 : 1 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+    >
+      {/* Background Aurora Effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent" />
+      
+      <div className="text-center w-80 max-w-[90vw]">
+        {/* Logo */}
+        <motion.div 
+          className="relative h-20 w-20 mx-auto mb-8"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
         >
-          <motion.div
-            className="text-center w-72 relative"
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -30, opacity: 0 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
-          >
-            {/* Logo or brandmark */}
-            <motion.div
-              initial={{ scale: 0.92, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              className="mb-8"
-            >
-              <div className="relative h-14 w-14 mx-auto">
-                <motion.div 
-                  className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 blur-md"
-                  animate={{ 
-                    opacity: [0.7, 0.9, 0.7],
-                    scale: [0.95, 1.05, 0.95]
-                  }}
-                  transition={{
-                    repeat: Infinity,
-                    duration: 2
-                  }}
-                />
-                <div className="absolute inset-0 rounded-full bg-white dark:bg-gray-900 flex items-center justify-center text-xl font-bold shadow-lg">
-                  <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">HK</span>
-                </div>
-              </div>
-            </motion.div>
-            {/* Loading title */}
-            <motion.h2
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.1, duration: 0.4 }}
-              className="text-xl font-bold text-gray-900 dark:text-white mb-5 tracking-tight"
-            >
-              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                Portfolio
-              </span>
-            </motion.h2>
-            {/* Progress bar */}
-            <div className="h-1.5 bg-gray-200 dark:bg-gray-700/50 rounded-full overflow-hidden mb-4">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${progress}%` }}
-                className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full shadow-sm"
-                transition={{ ease: "easeOut" }}
-              />
-            </div>
-            {/* Status text */}
-            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 font-medium">
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                Loading assets
-              </motion.p>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                {Math.round(progress)}%
-              </motion.p>
-            </div>
-          </motion.div>
+          <div className="absolute inset-0 rounded-full bg-accent/10 blur-lg animate-pulse" />
+          <div className="relative w-full h-full rounded-full bg-surface backdrop-blur-sm flex items-center justify-center text-3xl font-bold shadow-lg border border-border">
+            <span className="bg-gradient-to-br from-accent to-accent-hover bg-clip-text text-transparent">
+              HK
+            </span>
+          </div>
         </motion.div>
-      )}
-    </AnimatePresence>
+        
+        {/* Progress Bar */}
+        <div className="h-2 w-full bg-surface rounded-full overflow-hidden mb-4 border border-border">
+          <motion.div 
+            className="h-full bg-gradient-to-r from-accent to-accent-hover rounded-full"
+            initial={{ width: '0%' }}
+            animate={{ width: `${Math.min(progress, 100)}%` }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+          />
+        </div>
+        
+        {/* Status Text */}
+        <div className="flex justify-between text-sm font-medium text-text-muted">
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            Loading portfolio
+          </motion.p>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            {Math.round(progress)}%
+          </motion.p>
+        </div>
+      </div>
+    </motion.div>
   );
 };
 

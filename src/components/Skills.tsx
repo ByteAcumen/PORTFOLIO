@@ -1,10 +1,12 @@
-"use client";
+import React, { useRef, useEffect, useMemo, useState } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { motion, useScroll, useTransform } from 'framer-motion';
 
-import { useRef, useEffect, useState } from "react";
-import ParticleBackground from './ParticleBackground';
-import ProgressiveImage from './ProgressiveImage';
-import React from 'react';
+gsap.registerPlugin(ScrollTrigger);
+// import { useCursor } from '../contexts/useCursor';
 
+// Skills data with external logos
 const allSkills = [
   { name: 'JavaScript', logo: 'https://logos-world.net/wp-content/uploads/2023/02/JavaScript-Logo.png' },
   { name: 'TypeScript', logo: 'https://pngate.com/wp-content/uploads/2025/05/typescript-logo-blue-square-modern-design-icon-1.png' },
@@ -52,148 +54,281 @@ const allSkills = [
   { name: 'IoT', logo: 'https://www.shutterstock.com/image-vector/internet-things-glyph-icon-silhouette-260nw-1172566369.jpg' },
 ];
 
-const InfiniteRow = React.memo(function InfiniteRow({ skills, speed = 1.2, reverse = false }: { skills: typeof allSkills, speed?: number, reverse?: boolean }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const rowRef = useRef<HTMLDivElement>(null);
-  const [rowWidth, setRowWidth] = useState(0);
-  const [containerWidth, setContainerWidth] = useState(0);
-  const [repeatCount, setRepeatCount] = useState(2);
-  const [scroll, setScroll] = useState(0);
+interface Skill {
+  name: string;
+  logo: string;
+}
 
-  // Measure row and container width, calculate repeat count
-  useEffect(() => {
-    function measure() {
-      if (rowRef.current && containerRef.current) {
-        const singleRowWidth = rowRef.current.scrollWidth / repeatCount;
-        const contWidth = containerRef.current.offsetWidth;
-        setRowWidth(singleRowWidth);
-        setContainerWidth(contWidth);
-        // Repeat enough times to cover at least 2x container width
-        const minRepeats = Math.ceil((contWidth * 2) / singleRowWidth);
-        setRepeatCount(Math.max(2, minRepeats));
-      }
-    }
-    measure();
-    const debounced = () => { clearTimeout((window as any)._resizeTimer); (window as any)._resizeTimer = setTimeout(measure, 60); };
-    window.addEventListener('resize', debounced);
-    return () => window.removeEventListener('resize', debounced);
-    // eslint-disable-next-line
-  }, [skills]);
-
-  // Animation loop
-  useEffect(() => {
-    let frame: number;
-    let lastTime = performance.now();
-    setScroll(reverse ? -rowWidth : 0); // set initial position based on direction
-    function animate(now: number) {
-      const elapsed = now - lastTime;
-      lastTime = now;
-      setScroll((prev) => {
-        if (reverse) {
-          let next = prev + (speed * (elapsed / 16));
-          if (next >= 0) return -rowWidth;
-          return next;
-        } else {
-          let next = prev - (speed * (elapsed / 16));
-          if (next <= -rowWidth) return 0;
-          return next;
-        }
-      });
-      frame = requestAnimationFrame(animate);
-    }
-    frame = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frame);
-  }, [rowWidth, speed, reverse]);
-
-  // Render the row enough times for seamless loop
-  const repeatedSkills = Array.from({ length: repeatCount }, () => skills).flat();
+// Clean skill card component without hover glitches
+const SkillCard = ({ skill }: { skill: Skill }) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   return (
-    <div ref={containerRef} className="relative w-full overflow-hidden touch-pan-x will-change-transform will-change-opacity animate-fadein-up"
-      style={{
-        maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
-        WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
-      }}
-    >
-      <div
-        ref={rowRef}
-        className="flex w-max items-center gap-6 sm:gap-10 lg:gap-16 will-change-transform will-change-opacity"
-        style={{ transform: `translateX(${scroll}px)` }}
-      >
-        {repeatedSkills.map((skill, index) => (
-          <div
-            key={`${skill.name}-${index}`}
-            className="flex-shrink-0 animate-fadein-up"
-            style={{ animationDelay: `${(index % skills.length) * 0.07}s` }}
-          >
-            <div
-              className="relative h-14 w-24 sm:h-16 sm:w-28 lg:h-20 lg:w-32 glass rounded-xl transition-all duration-300 flex items-center justify-center"
-            >
-              <ProgressiveImage
-                src={skill.logo}
-                alt={skill.name}
-                className="object-contain p-2 sm:p-3 w-full h-full"
-              />
-            </div>
-            <span className="block mt-2 text-xs sm:text-sm text-gray-800 dark:text-gray-100 text-center font-medium truncate w-full">
-              {skill.name}
-            </span>
+    <div className="skill-card flex-shrink-0">
+      <div className="relative w-16 h-16 lg:w-20 lg:h-20 bg-white/80 dark:bg-white/10 backdrop-blur-xl border border-gray-200/50 dark:border-white/20 rounded-2xl p-3 shadow-lg flex items-center justify-center transition-all duration-300">
+        
+        {/* Loading skeleton */}
+        {!imageLoaded && !imageError && (
+          <div className="absolute inset-3 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded-xl animate-pulse" />
+        )}
+        
+        {/* Skill Logo */}
+        {!imageError && (
+          <img
+            src={skill.logo}
+            alt={skill.name}
+            className={`w-full h-full object-contain transition-opacity duration-300 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageError(true)}
+            loading="lazy"
+          />
+        )}
+        
+        {/* Error fallback */}
+        {imageError && (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl text-white font-bold text-xs">
+            {skill.name.charAt(0)}
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
-});
+};
 
-const Skills = React.memo(function Skills() {
-  // Split skills into 3 rows
-  const rowCount = 3;
-  const skillsRows = Array.from({ length: rowCount }, (_, i) =>
-    allSkills.filter((_, idx) => idx % rowCount === i)
-  );
+const Skills = () => {
+  const skillsRef = useRef<HTMLElement>(null);
+  
+  // Smooth scroll effects
+  const { scrollYProgress } = useScroll({
+    target: skillsRef,
+    offset: ["start end", "end start"]
+  });
+  
+  const opacityFade = useTransform(scrollYProgress, [0, 0.8], [1, 0.3]);
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.98]);
+
+  // Optimized skill organization for infinite scroll
+  const skillRows = useMemo(() => {
+    const rows = 3;
+    return Array.from({ length: rows }, (_, i) =>
+      allSkills.filter((_, idx) => idx % rows === i)
+    );
+  }, []);
+
+  // Optimized GSAP animations matching Hero section
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Single optimized timeline for entrance animations
+      const tl = gsap.timeline({ 
+        defaults: { ease: "power2.out" },
+        scrollTrigger: {
+          trigger: skillsRef.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          toggleActions: "play none none reverse"
+        }
+      });
+
+      tl.fromTo('.skills-badge', {
+          opacity: 0,
+          y: 20,
+          scale: 0.95
+        }, {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.6
+        })
+        .fromTo('.skills-title', {
+          opacity: 0,
+          y: 30
+        }, {
+          opacity: 1,
+          y: 0,
+          duration: 0.8
+        }, "-=0.4")
+        .fromTo('.skills-description', {
+          opacity: 0,
+          y: 20
+        }, {
+          opacity: 1,
+          y: 0,
+          duration: 0.6
+        }, "-=0.6")
+        .fromTo('.scroll-container', {
+          opacity: 0,
+          y: 40
+        }, {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          stagger: 0.1
+        }, "-=0.4");
+
+      // Optimized floating animation with will-change for better performance
+      gsap.set('.floating-bg', { willChange: 'transform' });
+      gsap.to('.floating-bg', {
+        y: -10,
+        duration: 3,
+        yoyo: true,
+        repeat: -1,
+        ease: "sine.inOut",
+        stagger: {
+          each: 0.4,
+          repeat: -1,
+          yoyo: true
+        }
+      });
+    }, skillsRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  // Optimized infinite scroll component without glitches
+  const InfiniteSkillRow = ({ skills, reverse = false, speed = 30 }: { 
+    skills: Skill[], 
+    reverse?: boolean, 
+    speed?: number 
+  }) => {
+    const containerRef = useRef<HTMLDivElement>(null);
+    
+    useEffect(() => {
+      if (!containerRef.current) return;
+      
+      const container = containerRef.current;
+      const firstChild = container.firstElementChild as HTMLElement;
+      if (!firstChild) return;
+
+      // Calculate total width for seamless loop
+      const itemWidth = firstChild.offsetWidth;
+      const gap = 24; // 6 * 4 = 24px gap
+      const totalWidth = (itemWidth + gap) * skills.length;
+      
+      // Set initial position and optimize for performance
+      gsap.set(container, { 
+        x: reverse ? -totalWidth : 0,
+        force3D: true,
+        willChange: 'transform'
+      });
+      
+      // Create ultra-smooth infinite animation
+      const animation = gsap.to(container, {
+        x: reverse ? 0 : -totalWidth,
+        duration: speed,
+        ease: "none",
+        repeat: -1,
+        force3D: true
+      });
+      
+      return () => {
+        animation.kill();
+      };
+    }, [skills, reverse, speed]);
+
+    // Double the skills for smooth infinite loop
+    const duplicatedSkills = [...skills, ...skills];
+
+    return (
+      <div 
+        className="scroll-container relative overflow-hidden py-3"
+        style={{
+          WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)',
+          maskImage: 'linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)',
+        }}
+      >
+        <div
+          ref={containerRef}
+          className="flex gap-6 will-change-transform"
+          style={{
+            width: 'max-content',
+            backfaceVisibility: 'hidden'
+          }}
+        >
+          {duplicatedSkills.map((skill, index) => (
+            <SkillCard 
+              key={`${skill.name}-${index}`} 
+              skill={skill}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <section className="py-20 sm:py-24 lg:py-28 min-h-[600px] relative overflow-hidden transition-colors duration-300 animate-fadein">
-      {/* Hero-style Background */}
-      <div className="absolute inset-0 z-0 pointer-events-none will-change-transform will-change-opacity">
-        {/* Light Theme */}
-        <div className="absolute inset-0 block dark:hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-blue-50/30" />
-          <div className="absolute top-20 right-20 w-64 h-64 bg-gradient-to-br from-blue-100/40 to-indigo-100/30 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
-          <div className="absolute bottom-32 left-16 w-48 h-48 bg-gradient-to-tr from-indigo-100/30 to-purple-100/20 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
-          <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: `linear-gradient(rgba(59,130,246,0.1) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,0.1) 1px,transparent 1px)`, backgroundSize: '50px 50px' }} />
-        </div>
-        {/* Dark Theme */}
-        <div className="absolute inset-0 hidden dark:block">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#0a1128] via-[#101630] to-[#14213d]" />
-          <div className="absolute top-20 right-20 w-64 h-64 bg-gradient-to-br from-blue-600/10 to-indigo-600/8 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
-          <div className="absolute bottom-32 left-16 w-48 h-48 bg-gradient-to-tr from-indigo-600/8 to-purple-600/6 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
-          <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: `linear-gradient(rgba(59,130,246,0.15) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,0.15) 1px,transparent 1px)`, backgroundSize: '50px 50px' }} />
-        </div>
-        {/* ParticleBackground for subtle depth */}
-        <ParticleBackground className="opacity-20 dark:opacity-30" />
-        <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-white/5 dark:to-black/5" />
-      </div>
-      <div className="container mx-auto px-2 sm:px-4 max-w-7xl relative z-10 will-change-transform will-change-opacity animate-fadein">
-        <div className="text-center mb-12 sm:mb-16 lg:mb-20">
-            <span className="inline-block px-4 py-2 bg-blue-100/80 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium mb-4 sm:mb-6 shadow-sm">
-              Skills & Technologies
+    <section 
+      ref={skillsRef}
+      id="skills"
+      className="py-20 lg:py-32 relative overflow-hidden bg-white dark:bg-gray-950 transition-colors duration-500"
+    >
+      {/* Optimized Professional Background matching Hero */}
+      <motion.div 
+        className="absolute inset-0 z-0"
+        style={{ scale }}
+      >
+        {/* Clean gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900" />
+        
+        {/* Minimal floating orbs for depth */}
+        <motion.div 
+          className="floating-bg absolute top-1/4 right-1/4 w-64 h-64 bg-gradient-to-r from-blue-500/8 to-purple-600/8 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.1, 1],
+            opacity: [0.4, 0.6, 0.4]
+          }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div 
+          className="floating-bg absolute bottom-1/3 left-1/4 w-80 h-80 bg-gradient-to-r from-indigo-500/6 to-blue-600/6 rounded-full blur-3xl"
+          animate={{
+            scale: [1.1, 1, 1.1],
+            opacity: [0.3, 0.5, 0.3]
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        />
+        
+        {/* Subtle overlay for better text contrast */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/10 dark:to-gray-950/20" />
+      </motion.div>
+
+      {/* Main Content Container */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div 
+          className="text-center mb-12 lg:mb-16"
+          style={{ opacity: opacityFade, scale }}
+        >
+          {/* Clean Professional Badge */}
+          <motion.div className="skills-badge inline-block px-4 py-2.5 bg-white/70 dark:bg-white/5 backdrop-blur-xl border border-gray-200/50 dark:border-white/10 rounded-xl text-sm font-medium text-blue-600 dark:text-blue-400 shadow-sm mb-6">
+            Skills & Technologies
+          </motion.div>
+
+          {/* Clean Title matching Hero font sizes */}
+          <motion.h2 className="skills-title text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 tracking-tight">
+            <span className="text-gray-900 dark:text-white">Technical </span>
+            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
+              Expertise
             </span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 tracking-tight">
-              Technical <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Expertise</span>
-            </h2>
-            <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed text-center">
-              A comprehensive toolkit of modern technologies and frameworks I use to build innovative digital solutions.
-            </p>
-          </div>
-          <div className="space-y-6 sm:space-y-8">
-            <InfiniteRow skills={skillsRows[0]} speed={1.2} reverse={false} />
-            <InfiniteRow skills={skillsRows[1]} speed={1.2} reverse={true} />
-            <InfiniteRow skills={skillsRows[2]} speed={1.2} reverse={false} />
-          </div>
+          </motion.h2>
+
+          {/* Clean Professional Description */}
+          <motion.p className="skills-description text-lg leading-relaxed text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            A comprehensive toolkit of modern technologies and frameworks I use to build 
+            <span className="font-medium text-gray-800 dark:text-gray-200"> innovative digital solutions</span>.
+          </motion.p>
+        </motion.div>
+
+        {/* Clean Infinite Scroll Rows */}
+        <div className="space-y-8 lg:space-y-12">
+          <InfiniteSkillRow skills={skillRows[0]} reverse={false} speed={35} />
+          <InfiniteSkillRow skills={skillRows[1]} reverse={true} speed={40} />
+          <InfiniteSkillRow skills={skillRows[2]} reverse={false} speed={32} />
         </div>
+      </div>
     </section>
   );
-});
+};
 
 export default Skills;

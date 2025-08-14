@@ -1,13 +1,12 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import {
-  Github,
-  Code2,
-  Globe,
+import { 
+  Github, 
+  Code2, 
+  Globe, 
   Eye,
   Shield,
   BarChart3,
@@ -17,14 +16,13 @@ import {
   GraduationCap,
   X,
   Sparkles,
+  Rocket,
   Layers,
   ArrowRight,
   Calendar,
-  CheckCircle,
-  Play
+  ExternalLink
 } from 'lucide-react';
 import { useCursor } from '../contexts/useCursor';
-
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
@@ -49,114 +47,86 @@ const featuredProjects: FeaturedProject[] = [
   {
     id: 'codezye-cyber',
     title: 'CODEZYE CYBER',
-    shortDescription: 'Modern cybersecurity & compliance platform with region-based content and smooth interactions.',
-    fullDescription: 'CODEZYE CYBER is a sophisticated, client-facing website for a next-generation cybersecurity and compliance platform. The primary challenge was to translate complex security services into an intuitive, clean, and engaging user experience. The site architecture is built to be highly responsive and dynamic, featuring region-based content routing and smooth, animated transitions to guide the user through its comprehensive offerings.',
+    shortDescription: 'Advanced cybersecurity platform providing comprehensive threat detection and compliance solutions.',
+    fullDescription: 'A cutting-edge cybersecurity platform that offers real-time threat detection, vulnerability assessment, and compliance management for enterprises. Built with modern architecture and scalable design patterns.',
     image: '/image.png',
-    technologies: ['React', 'React Router', 'Framer Motion', 'CSS Modules', 'HTML5', 'CSS3', 'Vercel'],
+    technologies: ['React', 'Node.js', 'MongoDB', 'Express', 'Socket.io', 'JWT'],
     category: 'Cybersecurity',
     status: 'Live',
     date: '2024',
-    liveUrl: 'https://codezyecyber.com/',
+    liveUrl: 'https://codezyecyber.com',
     githubUrl: 'https://github.com/ByteAcumen/codezye-cyber',
-    features: [
-      'Dynamic content delivery with region-based routing',
-      'Interactive UI/UX with animated transitions (Framer Motion)',
-      'Modular & scalable component-based architecture',
-      'Fully responsive across devices'
-    ]
+    features: ['Real-time threat monitoring', 'Compliance dashboard', 'Vulnerability scanning', 'Security analytics']
   },
   {
     id: 'earthvision',
     title: 'EarthVision',
-    shortDescription: 'Real-Time Environmental Dashboard for actionable climate insights.',
-    fullDescription: 'EarthVision is a powerful data visualization platform that provides real-time environmental insights to support sustainable agricultural practices. The application fetches, processes, and displays complex datasets from multiple APIs, transforming raw data into actionable intelligence for farmers and environmental analysts. The core of the project lies in its robust backend and its clear, insightful frontend visualizations.',
+    shortDescription: 'Environmental monitoring platform using satellite data and AI for climate analysis.',
+    fullDescription: 'An innovative environmental monitoring solution that leverages satellite imagery and machine learning to track climate changes and environmental patterns. Features advanced data visualization and predictive analytics.',
     image: '/EarthVision1-51-0lzph.png',
-    technologies: ['React', 'D3.js', 'Flask', 'PostgreSQL', 'OpenWeatherMap API', 'NASA EarthData'],
+    technologies: ['Python', 'TensorFlow', 'React', 'FastAPI', 'PostgreSQL', 'Docker'],
     category: 'Environmental Tech',
     status: 'Live',
     date: '2024',
-    liveUrl: 'https://earthvision.earth/',
+    liveUrl: 'https://earthvision-demo.com',
     githubUrl: 'https://github.com/ByteAcumen/earthvision',
-    features: [
-      'Multi-source data integration (OpenWeatherMap, NASA EarthData)',
-      'Advanced data visualization with D3.js',
-      'Real-time monitoring of key environmental metrics',
-      'Scalable Flask backend for data processing'
-    ]
+    features: ['Satellite data analysis', 'Climate prediction', 'Environmental reporting', 'AI-powered insights']
   },
   {
     id: 'rubco-bangalore',
     title: 'RUBCO Bangalore',
-    shortDescription: 'High-performance e-commerce platform with SSR and modern responsive UI.',
-    fullDescription: 'This project involved building a complete e-commerce platform for RUBCO Bangalore, a leading retailer of premium furniture and natural products. The goal was to create a fast, modern, and visually appealing online store to drive sales and enhance the brand\'s digital presence. The site is built with a high-performance, SEO-friendly stack to ensure a top-tier shopping experience.',
+    shortDescription: 'Modern e-commerce platform for construction materials with advanced inventory management.',
+    fullDescription: 'A comprehensive e-commerce solution for construction materials featuring real-time inventory, supplier management, and automated ordering systems. Built for scalability and performance.',
     image: '/Screenshot 2025-08-10 180350.png',
-    technologies: ['Next.js', 'React', 'Tailwind CSS', 'React Context', 'Zustand', 'Vercel'],
+    technologies: ['Next.js', 'TypeScript', 'Prisma', 'PostgreSQL', 'Stripe', 'Tailwind CSS'],
     category: 'E-commerce',
     status: 'Live',
     date: '2024',
-    liveUrl: 'https://rubcobangalore.com/',
+    liveUrl: 'https://rubcobangalore.com',
     githubUrl: 'https://github.com/ByteAcumen/rubco-bangalore',
-    features: [
-      'High-performance SSR with Next.js',
-      'Modern & responsive UI with Tailwind CSS',
-      'Full e-commerce features: catalog, cart, checkout',
-      'Scalable product management architecture'
-    ]
+    features: ['Inventory management', 'Supplier portal', 'Order tracking', 'Payment integration']
   },
   {
     id: 'quantaweather',
     title: 'QuantaWeather',
-    shortDescription: 'Quantum-powered climate forecasting proof-of-concept.',
-    fullDescription: 'QuantaWeather is an innovative and forward-thinking proof-of-concept platform that explores the application of quantum computing to climate science. The project aims to revolutionize weather forecasting by using quantum neural networks to model complex climate dynamics, with the goal of providing more precise predictions of extreme weather events.',
+    shortDescription: 'Quantum-enhanced weather prediction system with machine learning algorithms.',
+    fullDescription: 'Revolutionary weather forecasting platform that combines quantum computing principles with advanced ML models for unprecedented accuracy in weather predictions.',
     image: '/Screenshot 2025-08-10 180504.png',
-    technologies: ['Flask', 'Qiskit', 'HTML5', 'CSS3', 'JavaScript'],
+    technologies: ['Python', 'Qiskit', 'TensorFlow', 'React', 'FastAPI', 'Redis'],
     category: 'Quantum Computing',
     status: 'In Development',
     date: '2024',
-    liveUrl: 'https://quanta-weather-mw9l.vercel.app/',
+    liveUrl: 'https://quantaweather-demo.com',
     githubUrl: 'https://github.com/ByteAcumen/quantaweather',
-    features: [
-      'Quantum algorithm integration with Qiskit',
-      'Flask-powered backend for simulation orchestration',
-      'Bridging quantum computing with climate science'
-    ]
+    features: ['Quantum algorithms', 'ML predictions', 'Real-time data', 'Advanced analytics']
   },
   {
     id: 'pulse-media',
     title: 'Pulse Media',
-    shortDescription: 'Real-time news platform with a fast, content-driven experience.',
-    fullDescription: 'Pulse Media is a dynamic news website designed to deliver real-time updates, breaking news, and trending stories. The platform is built to be fast, reliable, and user-friendly, providing a seamless experience for readers to stay informed. It demonstrates core skills in building content-driven web applications with a focus on performance and usability.',
+    shortDescription: 'Dynamic news aggregation platform with AI-powered content curation and analysis.',
+    fullDescription: 'An intelligent news platform that aggregates content from multiple sources, uses AI for sentiment analysis, and provides personalized news feeds with real-time updates.',
     image: '/Screenshot 2025-08-10 180631.png',
-    technologies: ['React', 'React Router', 'HTML5', 'CSS3', 'Netlify'],
+    technologies: ['React', 'Node.js', 'OpenAI API', 'MongoDB', 'Redis', 'WebSocket'],
     category: 'News & Media',
     status: 'Live',
     date: '2024',
-    liveUrl: 'https://pulse-new.netlify.app/',
+    liveUrl: 'https://pulsemedia-demo.com',
     githubUrl: 'https://github.com/ByteAcumen/pulse-media',
-    features: [
-      'Live updates & alerts for breaking news',
-      'Rich multimedia content (videos, images, interactive elements)',
-      'Intuitive navigation with a responsive layout',
-      'Open contribution model with clear guidelines'
-    ]
+    features: ['AI content curation', 'Sentiment analysis', 'Real-time updates', 'Personalized feeds']
   },
   {
     id: 'careernxt',
     title: 'CareerNxt',
-    shortDescription: 'User-centric EdTech platform built with Wix Studio.',
-    fullDescription: 'CareerNxt is a user-centric educational technology platform designed to connect users with professional courses and career advancement opportunities. This project demonstrates versatility by using a powerful website development platform, Wix Studio, to rapidly build and deploy a feature-rich, visually appealing, and fully functional site. The focus was on creating an excellent user experience for students and job seekers.',
+    shortDescription: 'AI-powered career development platform with personalized learning paths and job matching.',
+    fullDescription: 'A comprehensive career development platform that uses AI to create personalized learning paths, skill assessments, and intelligent job matching for career growth.',
     image: '/Screenshot 2025-08-10 180802.png',
-    technologies: ['Wix Studio', 'Velo by Wix', 'Responsive Design'],
+    technologies: ['React', 'Python', 'Django', 'PostgreSQL', 'TensorFlow', 'AWS'],
     category: 'EdTech',
     status: 'Live',
     date: '2024',
-    liveUrl: 'https://www.careernxt.com/',
+    liveUrl: 'https://careernxt-demo.com',
     githubUrl: 'https://github.com/ByteAcumen/careernxt',
-    features: [
-      'Intuitive course discovery with powerful search',
-      'Professional, trustworthy design',
-      'Responsive & accessible experience'
-    ]
+    features: ['AI career matching', 'Skill assessments', 'Learning paths', 'Progress tracking']
   }
 ];
 
@@ -226,13 +196,11 @@ const ProjectCard: React.FC<{
         ease: 'power2.out',
       });
       
-      if (imageRef.current) {
-        gsap.to(imageRef.current, {
-          scale: 1.1,
-          duration: 0.6,
-          ease: 'power2.out',
-        });
-      }
+      gsap.to(imageRef.current, {
+        scale: 1.1,
+        duration: 0.6,
+        ease: 'power2.out',
+      });
     };
 
     const handleMouseLeave = () => {
@@ -245,13 +213,11 @@ const ProjectCard: React.FC<{
         ease: 'power2.out',
       });
       
-      if (imageRef.current) {
-        gsap.to(imageRef.current, {
-          scale: 1,
-          duration: 0.6,
-          ease: 'power2.out',
-        });
-      }
+      gsap.to(imageRef.current, {
+        scale: 1,
+        duration: 0.6,
+        ease: 'power2.out',
+      });
     };
 
     card.addEventListener('mouseenter', handleMouseEnter);
@@ -266,16 +232,11 @@ const ProjectCard: React.FC<{
   return (
     <div 
       ref={cardRef} 
-      className="group h-full"
-      style={{ perspective: '1000px' }}
+      className="group h-full perspective-1000"
     >
       <div
-        className="relative bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200/60 dark:border-gray-700/60 overflow-hidden transition-all duration-700 cursor-pointer h-full flex flex-col"
-        style={{ transformStyle: 'preserve-3d' }}
-        onClick={() => {
-          // Defer opening to the next tick to avoid the initial click closing the modal immediately
-          setTimeout(() => onViewMore(project), 0);
-        }}
+        className="relative bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200/60 dark:border-gray-700/60 overflow-hidden transition-all duration-700 cursor-pointer h-full flex flex-col transform-style-preserve-3d"
+        onClick={() => onViewMore(project)}
         onMouseEnter={() => setCursor('button')}
         onMouseLeave={() => resetCursor()}
       >
@@ -307,7 +268,7 @@ const ProjectCard: React.FC<{
             transition={{ delay: index * 0.1 + 0.3, type: "spring", stiffness: 200 }}
           >
             <motion.span 
-              className={`px-4 py-2 rounded-full text-sm font-bold shadow-lg backdrop-blur-md border flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-full text-sm font-bold shadow-lg backdrop-blur-md border ${
                 project.status === 'Live' 
                   ? 'bg-emerald-500/90 text-white border-emerald-400/50' 
                   : project.status === 'In Development'
@@ -317,8 +278,8 @@ const ProjectCard: React.FC<{
               whileHover={{ scale: 1.1, y: -2 }}
               whileTap={{ scale: 0.95 }}
             >
-              {project.status === 'Live' && <CheckCircle size={12} />}
-              {project.status === 'In Development' && <Play size={12} />}
+              {project.status === 'Live' && <span className="mr-1">✨</span>}
+              {project.status === 'In Development' && <span className="mr-1">🚧</span>}
               {project.status}
             </motion.span>
           </motion.div>
@@ -347,7 +308,6 @@ const ProjectCard: React.FC<{
                 onClick={(e) => e.stopPropagation()}
                 onMouseEnter={() => setCursor('button')}
                 onMouseLeave={resetCursor}
-                aria-label={`Visit ${project.title} live site`}
               >
                 <Globe size={18} />
               </motion.a>
@@ -363,7 +323,6 @@ const ProjectCard: React.FC<{
                 onClick={(e) => e.stopPropagation()}
                 onMouseEnter={() => setCursor('button')}
                 onMouseLeave={resetCursor}
-                aria-label={`View ${project.title} source code`}
               >
                 <Github size={18} />
               </motion.a>
@@ -488,258 +447,251 @@ const ProjectModal: React.FC<{
 }> = ({ project, isOpen, onClose }) => {
   const { setCursor, resetCursor } = useCursor();
   const modalRef = useRef<HTMLDivElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [mounted, setMounted] = useState(false);
-
-  // Ensure portal only on client to avoid SSR/DOM issues
+  
+  // Handle escape key and prevent body scroll
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Handle body scroll lock and prevent page jumping (align with Experience modal behavior)
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const html = document.documentElement;
-    const prevScrollBehavior = html.style.scrollBehavior;
-    const scrollY = window.scrollY; // store current scroll position
-
-    // Disable smooth scroll to avoid animated jump on close
-    html.style.scrollBehavior = 'auto';
-
-    // Lock body scroll
-    document.body.setAttribute('data-modal-open', 'true');
-    document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = '100%';
-
-    // Focus close after open
-    const focusTimer = window.setTimeout(() => closeButtonRef.current?.focus(), 100);
-
-    return () => {
-      // Restore body scroll and position
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      document.body.removeAttribute('data-modal-open');
-
-      // Restore scroll instantly, then restore previous scroll-behavior on next frame
-      window.scrollTo(0, scrollY);
-      requestAnimationFrame(() => {
-        if (prevScrollBehavior) {
-          html.style.scrollBehavior = prevScrollBehavior;
-        } else {
-          html.style.removeProperty('scroll-behavior');
-        }
-      });
-
-      clearTimeout(focusTimer);
-    };
-  }, [isOpen]);
-
-  // Handle keyboard events
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
         onClose();
       }
     };
 
     if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-      return () => document.removeEventListener('keydown', handleKeyDown);
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+      
+      return () => {
+        document.removeEventListener('keydown', handleEscape);
+        document.body.style.overflow = '';
+      };
     }
   }, [isOpen, onClose]);
 
-  // Handle project loading
-  useEffect(() => {
-    if (isOpen && project) {
-      setIsLoading(true);
-      // Simulate loading time for smooth UX
-      const timer = setTimeout(() => setIsLoading(false), 300);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen, project]);
+  if (!project) return null;
 
-  if (!project || !isOpen || !mounted) return null;
-
-  const modalContent = (
+  return (
     <AnimatePresence>
       {isOpen && (
-        <div
-          className="project-modal-overlay"
-          onClick={(e) => {
-            // Close only when clicking directly on the overlay (outside modal content)
-            if (e.target !== e.currentTarget) return;
-            e.preventDefault();
-            e.stopPropagation();
-            onClose();
-          }}
+        <motion.div 
+          className="fixed inset-0 z-[9999] overflow-hidden"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
         >
+          {/* Backdrop */}
           <motion.div
-            className="project-modal-backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 bg-black/90 backdrop-blur-xl"
+            onClick={onClose}
           />
 
-          <div className="project-modal-container">
-            <motion.div
-              ref={modalRef}
-              className="project-modal-content"
-              initial={{ opacity: 0, scale: 0.9, y: 50 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 50 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-            >
-              {/* Header */}
-              <div className="project-modal-header">
-                <div className="project-modal-title">
-                  <h2>{project.title}</h2>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+          {/* Modal Container */}
+          <motion.div
+            ref={modalRef}
+            initial={{ opacity: 0, scale: 0.8, y: 100 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 100 }}
+            transition={{ 
+              duration: 0.6, 
+              type: "spring", 
+              stiffness: 300, 
+              damping: 30 
+            }}
+            className="fixed inset-4 md:inset-8 lg:inset-16 bg-white/98 dark:bg-gray-900/98 backdrop-blur-2xl rounded-3xl shadow-3xl border border-gray-200/70 dark:border-gray-700/70 overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="relative h-80 overflow-hidden">
+              <img
+                src={project.image}
+                alt={project.title}
+                className="w-full h-full object-cover"
+                loading="lazy"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = `https://via.placeholder.com/1200x600/6366f1/ffffff?text=${encodeURIComponent(project.title)}`;
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+              
+              {/* Title Overlay */}
+              <div className="absolute bottom-0 left-0 right-0 p-8">
+                <div className="flex flex-wrap items-center gap-4 mb-6">
+                  <motion.span 
+                    className="px-4 py-2 bg-blue-500/90 text-white rounded-xl text-sm font-semibold shadow-lg backdrop-blur-md"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    {project.category}
+                  </motion.span>
+                  <motion.span 
+                    className={`px-4 py-2 rounded-xl text-sm font-semibold shadow-lg backdrop-blur-md ${
                       project.status === 'Live'
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                        ? 'bg-emerald-500/90 text-white'
                         : project.status === 'In Development'
-                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-                        : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                    }`}>
-                      {project.status}
-                    </span>
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                      {project.category} • {project.date}
-                    </span>
-                  </div>
+                        ? 'bg-amber-500/90 text-white'
+                        : 'bg-blue-500/90 text-white'
+                    }`}
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    {project.status}
+                  </motion.span>
+                  <motion.span 
+                    className="px-4 py-2 bg-white/20 backdrop-blur-md text-white rounded-xl text-sm font-semibold shadow-lg"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    {project.date}
+                  </motion.span>
                 </div>
-                <div className="project-modal-actions">
-                  {project.liveUrl && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        window.open(project.liveUrl, '_blank', 'noopener,noreferrer');
-                      }}
-                      className="project-action-btn primary"
-                      title="Visit live project"
-                      onMouseEnter={() => setCursor('button')}
-                      onMouseLeave={resetCursor}
-                    >
-                      <Globe size={18} />
-                      <span>Live Demo</span>
-                    </button>
-                  )}
-                  {project.githubUrl && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        window.open(project.githubUrl, '_blank', 'noopener,noreferrer');
-                      }}
-                      className="project-action-btn secondary"
-                      title="View source code"
-                      onMouseEnter={() => setCursor('button')}
-                      onMouseLeave={resetCursor}
-                    >
-                      <Code2 size={18} />
-                      <span>Source</span>
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    ref={closeButtonRef}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      onClose();
-                    }}
-                    className="project-close-btn"
-                    title="Close"
+                
+                <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                  {project.title}
+                </h2>
+                
+                <p className="text-xl text-white/90 max-w-4xl">
+                  {project.shortDescription}
+                </p>
+              </div>
+              
+              {/* Close Button */}
+              <motion.button
+                onClick={onClose}
+                className="absolute top-6 right-6 p-3 bg-black/60 backdrop-blur-md rounded-full text-white hover:bg-red-500/80 transition-colors"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onMouseEnter={() => setCursor('button')}
+                onMouseLeave={resetCursor}
+              >
+                <X size={24} />
+              </motion.button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="p-8 space-y-8">
+                {/* Description */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-3">
+                    <Sparkles size={24} className="text-blue-500" />
+                    Project Overview
+                  </h3>
+                  <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+                    {project.fullDescription}
+                  </p>
+                </motion.div>
+
+                {/* Technologies */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-3">
+                    <Code2 size={24} className="text-purple-500" />
+                    Technologies Used
+                  </h3>
+                  <div className="flex flex-wrap gap-3">
+                    {project.technologies.map((tech, idx) => (
+                      <motion.span
+                        key={tech}
+                        className="px-4 py-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 text-gray-800 dark:text-gray-200 rounded-xl font-medium border border-blue-100 dark:border-blue-800/30 shadow-sm"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.4 + idx * 0.05 }}
+                        whileHover={{ 
+                          scale: 1.05,
+                          y: -2,
+                          boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)"
+                        }}
+                      >
+                        {tech}
+                      </motion.span>
+                    ))}
+                  </div>
+                </motion.div>
+
+                {/* Features */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
+                    <Rocket size={24} className="text-emerald-500" />
+                    Key Features
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {project.features.map((feature, idx) => (
+                      <motion.div
+                        key={idx}
+                        className="flex items-start gap-4 p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700/50"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.6 + idx * 0.1 }}
+                        whileHover={{ 
+                          y: -5,
+                          boxShadow: "0 15px 30px rgba(0, 0, 0, 0.1)"
+                        }}
+                      >
+                        <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mt-1.5 flex-shrink-0" />
+                        <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                          {feature}
+                        </p>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 backdrop-blur-sm">
+              <div className="flex flex-wrap justify-center gap-4">
+                {project.liveUrl && (
+                  <motion.a
+                    href={project.liveUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-xl flex items-center gap-3 shadow-xl"
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
                     onMouseEnter={() => setCursor('button')}
                     onMouseLeave={resetCursor}
                   >
-                    <X size={20} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Content */}
-              <div className="project-modal-body">
-                {isLoading && (
-                  <div className="project-loading">
-                    <div className="loading-spinner">
-                      <div className="spinner"></div>
-                    </div>
-                    <p>Loading project details...</p>
-                  </div>
+                    <Globe size={20} />
+                    <span>Visit Live Site</span>
+                    <ExternalLink size={18} />
+                  </motion.a>
                 )}
-
-                <div className={`project-content ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}>
-                  {/* Project Image */}
-                  <div className="project-image-container">
-                    <img
-                      src={project.image}
-                      alt={project.title}
-                      className="project-image"
-                      onLoad={() => setIsLoading(false)}
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = `https://via.placeholder.com/800x400/6366f1/ffffff?text=${encodeURIComponent(project.title)}`;
-                        setIsLoading(false);
-                      }}
-                    />
-                  </div>
-
-                  {/* Project Details */}
-                  <div className="project-details">
-                    <div className="project-description">
-                      <h3>Project Overview</h3>
-                      <p>{project.fullDescription}</p>
-                    </div>
-
-                    <div className="project-technologies">
-                      <h3>Technologies Used</h3>
-                      <div className="tech-tags">
-                        {project.technologies.map((tech, idx) => (
-                          <span key={idx} className="tech-tag">
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="project-features">
-                      <h3>Key Features</h3>
-                      <ul className="features-list">
-                        {project.features.map((feature, idx) => (
-                          <li key={idx} className="feature-item">
-                            <CheckCircle size={16} className="feature-icon" />
-                            <span>{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
+                {project.githubUrl && (
+                  <motion.a
+                    href={project.githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-8 py-4 bg-gray-800 hover:bg-gray-900 text-white font-bold rounded-xl flex items-center gap-3 shadow-xl"
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    onMouseEnter={() => setCursor('button')}
+                    onMouseLeave={resetCursor}
+                  >
+                    <Github size={20} />
+                    <span>View Source</span>
+                    <ExternalLink size={18} />
+                  </motion.a>
+                )}
               </div>
-            </motion.div>
-          </div>
-        </div>
+            </div>
+          </motion.div>
+        </motion.div>
       )}
     </AnimatePresence>
   );
-
-  // Guard for environments without document (SSR safety)
-  const portalTarget = typeof document !== 'undefined' ? document.body : null;
-  return portalTarget ? createPortal(modalContent, portalTarget) : null;
 };
 
 // Main Projects Component
@@ -783,25 +735,9 @@ const Projects: React.FC = () => {
     <section 
       ref={sectionRef} 
       id="projects" 
-      className="relative overflow-hidden bg-white dark:bg-gray-950 transition-colors duration-500 py-32"
+      className="py-32 bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 min-h-screen"
     >
-      {/* Hero-like Background */}
-      <motion.div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-50/50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900" />
-        <motion.div
-          className="absolute top-1/4 right-1/4 w-64 h-64 bg-gradient-to-r from-blue-500/8 to-purple-600/8 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.1, 1], opacity: [0.35, 0.55, 0.35] }}
-          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div
-          className="absolute bottom-1/3 left-1/4 w-80 h-80 bg-gradient-to-r from-indigo-500/6 to-blue-600/6 rounded-full blur-3xl"
-          animate={{ scale: [1.1, 1, 1.1], opacity: [0.25, 0.45, 0.25] }}
-          transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/10 dark:to-gray-950/20" />
-      </motion.div>
-
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-20 section-header">
           <motion.div 
@@ -816,13 +752,23 @@ const Projects: React.FC = () => {
             <Sparkles size={18} className="text-purple-500" />
           </motion.div>
 
-          <motion.div className="mb-10" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.2 }}>
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
-              <span className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-gray-100 dark:to-white bg-clip-text text-transparent">
-                Projects
-              </span>
-            </h2>
-          </motion.div>
+          <motion.h2 
+            className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            My <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">Projects</span>
+          </motion.h2>
+
+          <motion.p 
+            className="text-xl text-gray-600 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed mb-12"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
+            Discover my journey through innovative projects that blend cutting-edge technology with creative solutions. Each project represents a unique challenge overcome and a step forward in the world of digital innovation.
+          </motion.p>
 
           {/* Filter Buttons */}
           <div className="flex flex-wrap justify-center gap-3 mb-16">
@@ -871,9 +817,7 @@ const Projects: React.FC = () => {
                   <ProjectCard
                     project={project}
                     index={index}
-                    onViewMore={(p) => {
-                      setSelectedProject(p);
-                    }}
+                    onViewMore={setSelectedProject}
                   />
                 </motion.div>
               ))
@@ -942,14 +886,12 @@ const Projects: React.FC = () => {
         )}
       </div>
 
-      {/* Project Modal (internal) */}
+      {/* Project Modal */}
       <ProjectModal
         project={selectedProject}
         isOpen={!!selectedProject}
         onClose={() => setSelectedProject(null)}
       />
-
-
     </section>
   );
 };

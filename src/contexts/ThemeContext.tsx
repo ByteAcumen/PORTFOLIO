@@ -1,6 +1,5 @@
-import React, { createContext, useEffect, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useState, useCallback, useMemo, ReactNode } from 'react';
 
-// Accent color options
 export type AccentColor = 'blue' | 'purple' | 'teal' | 'rose';
 
 export interface ThemeContextType {
@@ -8,76 +7,82 @@ export interface ThemeContextType {
   accentColor: AccentColor;
   toggleTheme: () => void;
   setAccentColor: (color: AccentColor) => void;
-  themeTransition: boolean;
 }
 
-// Create context
-export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+// --- BEST PRACTICE: Default Context Value ---
+// Provide a default value to eliminate the need for `| undefined` checks.
+// This makes the consumer hook (`useTheme`) safer and allows components
+// to be tested without needing to be wrapped in a ThemeProvider.
+const defaultContextValue: ThemeContextType = {
+  isDark: false,
+  accentColor: 'blue',
+  toggleTheme: () => {}, // No-operation function
+  setAccentColor: () => {}, // No-operation function
+};
+
+export const ThemeContext = createContext<ThemeContextType>(defaultContextValue);
+
+// --- BEST PRACTICE: Initializer Functions ---
+// These functions correctly determine the initial state *before* the first render.
+// They are crucial for syncing React's state with what the inline script in `index.html`
+// has already set on the DOM, preventing UI mismatches on load.
+const getInitialIsDark = (): boolean => {
+  // SSR-safe check
+  if (typeof window === 'undefined') return false;
+  // The state should reflect what's already on the DOM from our inline script.
+  return document.documentElement.classList.contains('dark');
+};
+
+const getInitialAccent = (): AccentColor => {
+  // SSR-safe check
+  if (typeof window === 'undefined') return 'blue';
+  // Check localStorage first, then the DOM attribute, then fallback.
+  const storedAccent = localStorage.getItem('accentColor') as AccentColor | null;
+  const domAccent = document.documentElement.getAttribute('data-accent') as AccentColor | null;
+  return storedAccent || domAccent || 'blue';
+};
+
 
 /**
- * ThemeProvider manages dark/light mode and accent color, with smooth transitions and instant updates.
+ * ThemeProvider manages the application's visual theme (dark/light mode) and accent color.
+ * It is highly optimized and works in tandem with the inline script in `index.html`
+ * to provide a seamless, flicker-free theme experience.
  */
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Initialize dark mode from localStorage or system preference
-  const [isDark, setIsDark] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('isDark');
-      if (savedTheme !== null) return JSON.parse(savedTheme);
-      // System preference fallback
-      return window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
-    return false;
-  });
+export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [isDark, setIsDark] = useState(getInitialIsDark);
+  const [accentColor, setAccentColorState] = useState<AccentColor>(getInitialAccent);
 
-  // Initialize accent color from localStorage or default to blue
-  const [accentColor, setAccentColorState] = useState<AccentColor>(() => {
-    if (typeof window !== 'undefined') {
-      return (localStorage.getItem('accentColor') as AccentColor) || 'blue';
-    }
-    return 'blue';
-  });
-
-  // Track transition state for smooth animations
-  const [themeTransition, setThemeTransition] = useState(false);
-
-  // Apply theme and accent color changes to the DOM instantly and smoothly
-  useEffect(() => {
-    const root = document.documentElement;
-    root.classList.toggle('dark', isDark);
-    root.setAttribute('data-accent', accentColor);
-    localStorage.setItem('isDark', JSON.stringify(isDark));
-    localStorage.setItem('accentColor', accentColor);
-    // Trigger transition animation when theme changes
-    if (themeTransition) {
-      root.classList.add('theme-transition');
-      const timer = setTimeout(() => {
-        root.classList.remove('theme-transition');
-        setThemeTransition(false);
-      }, 300); // Match the 0.3s transition duration
-      return () => clearTimeout(timer);
-    }
-  }, [isDark, accentColor, themeTransition]);
-
-  // Toggle between light and dark themes
+  // --- BEST PRACTICE: Memoized Handlers ---
+  // These handlers are memoized to prevent unnecessary re-renders in child components.
   const toggleTheme = useCallback(() => {
-    setIsDark((prev) => !prev);
-    setThemeTransition(true);
+    setIsDark(prev => {
+      const newValue = !prev;
+      // Update DOM and localStorage
+      if (newValue) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      localStorage.setItem('darkMode', newValue ? 'true' : 'false');
+      return newValue;
+    });
   }, []);
 
-  // Set accent color
   const setAccentColor = useCallback((color: AccentColor) => {
     setAccentColorState(color);
-    setThemeTransition(true);
+    // Update DOM and localStorage
+    document.documentElement.setAttribute('data-accent', color);
+    localStorage.setItem('accentColor', color);
   }, []);
 
-  // Memoize context value for performance
+  // --- BEST PRACTICE: Memoized Context Value ---
+  // The context value is memoized to prevent unnecessary re-renders in child components.
   const contextValue = useMemo(() => ({
-        isDark,
-        accentColor,
-        toggleTheme,
-        setAccentColor,
-        themeTransition,
-  }), [isDark, accentColor, toggleTheme, setAccentColor, themeTransition]);
+    isDark,
+    accentColor,
+    toggleTheme,
+    setAccentColor,
+  }), [isDark, accentColor, toggleTheme, setAccentColor]);
 
   return (
     <ThemeContext.Provider value={contextValue}>
@@ -85,5 +90,3 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     </ThemeContext.Provider>
   );
 };
-
-// Hook moved to separate file: useTheme.ts
