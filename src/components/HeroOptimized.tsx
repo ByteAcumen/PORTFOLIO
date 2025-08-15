@@ -1,10 +1,11 @@
 import { useEffect, useRef, useMemo } from 'react';
 import { gsap } from 'gsap';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { Eye, Mail, Github, Linkedin } from 'lucide-react';
 import { useCursor } from '../contexts/useCursor';
 import TypewriterEffect from './TypewriterEffect';
 import ProgressiveImage from './ProgressiveImage';
+import { smoothScrollTo } from '../utils/smoothScroll';
 
 interface HeroProps {
   openResumeModal: () => void;
@@ -14,6 +15,7 @@ const HeroOptimized: React.FC<HeroProps> = ({ openResumeModal }) => {
   const { setCursor, resetCursor } = useCursor();
   
   const heroRef = useRef<HTMLElement>(null);
+  const prefersReducedMotion = useReducedMotion();
   
   // Subtle scroll effects without parallax movement
   const { scrollYProgress } = useScroll({
@@ -21,8 +23,8 @@ const HeroOptimized: React.FC<HeroProps> = ({ openResumeModal }) => {
     offset: ["start start", "end start"]
   });
   
-  const opacityFade = useTransform(scrollYProgress, [0, 0.8], [1, 0.3]);
-  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.98]);
+  const opacityFade = prefersReducedMotion ? 1 : useTransform(scrollYProgress, [0, 0.8], [1, 0.3]);
+  const scale = prefersReducedMotion ? 1 : useTransform(scrollYProgress, [0, 0.5], [1, 0.98]);
 
   // Professional social links matching header style
   const socialLinks = useMemo(() => [
@@ -126,7 +128,7 @@ const HeroOptimized: React.FC<HeroProps> = ({ openResumeModal }) => {
     <section 
       ref={heroRef}
       id="hero" 
-      className="min-h-screen relative overflow-hidden bg-white dark:bg-gray-950 transition-colors duration-500"
+      className="min-h-screen relative overflow-hidden bg-white dark:bg-gray-950 transition-colors duration-500 performance-optimized performance-optimized-scroll touch-optimized"
     >
       {/* Optimized Professional Background */}
       <motion.div 
@@ -297,7 +299,8 @@ const HeroOptimized: React.FC<HeroProps> = ({ openResumeModal }) => {
                 onClick={() => {
                   const element = document.getElementById('contact');
                   if (element) {
-                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    // Use optimized smooth scroll with header offset
+                    smoothScrollTo(element, { duration: 700, offset: 80 });
                   }
                 }}
                 className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
@@ -316,28 +319,6 @@ const HeroOptimized: React.FC<HeroProps> = ({ openResumeModal }) => {
                 </div>
               </motion.button>
 
-              {/* Resume Button */}
-              <motion.button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  openResumeModal();
-                }}
-                className="group relative px-8 py-4 bg-white/80 dark:bg-white/10 backdrop-blur-xl border border-gray-200/50 dark:border-white/20 text-gray-800 dark:text-gray-200 font-semibold rounded-xl shadow-lg hover:shadow-xl hover:bg-white/95 dark:hover:bg-white/15 transition-all duration-300"
-                onMouseEnter={() => setCursor('button')}
-                onMouseLeave={() => resetCursor()}
-                whileHover={{
-                  scale: 1.02,
-                  y: -2
-                }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <div className="relative flex items-center justify-center gap-3">
-                  <Eye size={18} />
-                  <span>View Resume</span>
-                </div>
-              </motion.button>
             </motion.div>
 
             {/* Clean Social Links */}
